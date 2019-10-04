@@ -25,9 +25,8 @@ import android.content.Intent;
 
 import com.example.socialsharer.MainActivity;
 import com.example.socialsharer.R;
+import com.example.socialsharer.EditProfileActivity;
 import com.example.socialsharer.RegisterActivity;
-import com.example.socialsharer.ui.login.LoginViewModel;
-import com.example.socialsharer.ui.login.LoginViewModelFactory;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -109,6 +108,8 @@ public class LoginActivity extends AppCompatActivity {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     loginViewModel.login(usernameEditText.getText().toString(),
                             passwordEditText.getText().toString());
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    return true;
                 }
                 return false;
             }
