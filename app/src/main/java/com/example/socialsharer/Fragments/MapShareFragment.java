@@ -29,6 +29,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -68,6 +70,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private long userNumber;
     private ArrayList<Integer> selectedIndex = new ArrayList();
     private int targeNumber = 3;
+    private String nickName;
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -103,7 +106,11 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         Bundle bundle = getArguments();
         userEmail = bundle.getString("email");
         userNumber = bundle.getLong("userNumber");
-
+        try{
+            nickName = bundle.getString("nickName");
+        } catch (Error error){
+            nickName = null;
+        }
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
     }
 
@@ -124,7 +131,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
-        Toast.makeText(getActivity(), "Map is ready:\n",Toast.LENGTH_LONG).show();
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             permission = true;
@@ -181,8 +187,14 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
-        Toast.makeText(getActivity(), "Current location:\n"
-                + location, Toast.LENGTH_LONG).show();
+        String messageToShow;
+        String message = "!\nGo to find some new friends :)";
+        if (nickName == null){
+            messageToShow = "This is yourself" + message;
+        } else {
+            messageToShow = "Hey " + nickName + message;
+        }
+        Toast.makeText(getActivity(), messageToShow, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -276,8 +288,25 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     for (User user: recomendUserList){
                         Double longitude = user.getLongitude();
                         Double latitude = user.getLatitude();
+                        float opacity = (float) 0.75;
+                        String userName = user.getNickName();
+                        String introduction = user.getIntroduction();
                         LatLng userLocation = new LatLng(latitude, longitude);
-                        googleMap.addMarker(new MarkerOptions().position(userLocation));
+                        if (introduction != null) {
+                            googleMap.addMarker(new MarkerOptions()
+                                    .alpha(opacity)
+                                    .position(userLocation)
+                                    .title(userName)
+                                    .snippet(introduction)
+                                    .flat(false));
+                        } else {
+                            googleMap.addMarker(new MarkerOptions()
+                                    .alpha(opacity)
+                                    .position(userLocation)
+                                    .title(userName)
+                                    .flat(false));
+                        }
+
                     }
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
@@ -319,6 +348,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 String introduction = null;
                                 Double latitude = null;
                                 Double longitude = null;
+                                String email = null;
                                 if (document.get("nickName") != null){
                                     nickName = (String) document.get("nickName");
                                 }
@@ -331,12 +361,20 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 if (document.get("introduction") != null){
                                     introduction = (String) document.get("introduction");
                                 }
+                                if (document.get("email") != null){
+                                    email = (String) document.get("email");
+                                }
                                 User newRecommendUser =
-                                        new User(null,
+                                        new User(email,
                                                 nickName, introduction, latitude, longitude);
-                                Log.i(TAG, "add user: " + newRecommendUser.getNickName());
-                                recomendUserList.add(newRecommendUser);
-                                Log.i(TAG, "Current size: " + recomendUserList.size());
+                                if (newRecommendUser.getEmail().equals(userEmail)){
+                                    targeNumber = targeNumber - 1;
+                                }
+                                else {
+                                    Log.i(TAG, "add user: " + newRecommendUser.getNickName());
+                                    recomendUserList.add(newRecommendUser);
+                                    Log.i(TAG, "Current size: " + recomendUserList.size());
+                                }
                             }
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());

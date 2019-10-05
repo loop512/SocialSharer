@@ -23,8 +23,13 @@ import com.example.socialsharer.Fragments.MapShareFragment;
 import com.example.socialsharer.Fragments.ProfileFragment;
 import com.example.socialsharer.Fragments.QRShareFragment;
 import com.example.socialsharer.Fragments.SettingsFragment;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
@@ -35,11 +40,16 @@ public class MainActivity extends AppCompatActivity
 
     public DrawerLayout drawer;
     private String userEmail;
+    private String introduction;
+    private String nickName;
     private long userNumber;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        db = FirebaseFirestore.getInstance();
 
         Intent previous = getIntent();
         Bundle bundle = previous.getExtras();
@@ -47,6 +57,7 @@ public class MainActivity extends AppCompatActivity
             userEmail = (String) bundle.get("email");
             userNumber = (long) bundle.get("userNumber");
         }
+        getMyInfo();
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
 
         setContentView(R.layout.activity_main);
@@ -112,6 +123,9 @@ public class MainActivity extends AppCompatActivity
         Bundle bundle = new Bundle();
         bundle.putString("email", userEmail);
         bundle.putLong("userNumber", userNumber);
+        if (nickName != null){
+            bundle.putString("nickName", nickName);
+        }
 
         if (id == R.id.nav_profile) {
             fragment = new ProfileFragment();
@@ -199,6 +213,33 @@ public class MainActivity extends AppCompatActivity
                 Log.w(TAG, "User permissions required by map services are denied.");
             }
         }
+    }
+
+    private void getMyInfo(){
+
+        DocumentReference docRef = db.collection("users").
+                document(userEmail);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        if (document.get("nickName") != null){
+                            nickName = (String) document.get("nickName");
+                        }
+                        if (document.get("introduction") != null){
+                            introduction = (String) document.get("introduction");
+                        }
+                        Log.d(TAG, "User nick name:" + nickName);
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
     }
 }
 
