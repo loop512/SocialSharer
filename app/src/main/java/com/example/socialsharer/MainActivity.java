@@ -24,6 +24,7 @@ import com.example.socialsharer.Fragments.ProfileFragment;
 import com.example.socialsharer.Fragments.QRShareFragment;
 import com.example.socialsharer.Fragments.SettingsFragment;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
@@ -33,10 +34,21 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "MainActivity";
 
     public DrawerLayout drawer;
+    private String userEmail;
+    private long userNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent previous = getIntent();
+        Bundle bundle = previous.getExtras();
+        if (bundle != null){
+            userEmail = (String) bundle.get("email");
+            userNumber = (long) bundle.get("userNumber");
+        }
+        Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -97,6 +109,10 @@ public class MainActivity extends AppCompatActivity
             return false;
         }
 
+        Bundle bundle = new Bundle();
+        bundle.putString("email", userEmail);
+        bundle.putLong("userNumber", userNumber);
+
         if (id == R.id.nav_profile) {
             fragment = new ProfileFragment();
         } else if (id == R.id.nav_qrshare) {
@@ -111,6 +127,7 @@ public class MainActivity extends AppCompatActivity
         else {
             fragment = new ProfileFragment();
         }
+        fragment.setArguments(bundle);
         previousItemId = item.getItemId();
         drawer.closeDrawer(GravityCompat.START);
 
@@ -176,9 +193,10 @@ public class MainActivity extends AppCompatActivity
                 // Permission was granted. Kick off the process of building and connecting
                 // GoogleApiClient.
                 openMapActivity();
+                Log.i(TAG, "User permissions required by map services are granted.");
             } else {
                 // Permission denied.
-
+                Log.w(TAG, "User permissions required by map services are denied.");
             }
         }
     }

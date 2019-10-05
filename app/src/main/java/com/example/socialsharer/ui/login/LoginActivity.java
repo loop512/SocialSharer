@@ -2,6 +2,7 @@ package com.example.socialsharer.ui.login;
 
 import android.app.Activity;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
@@ -13,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -27,14 +29,27 @@ import com.example.socialsharer.MainActivity;
 import com.example.socialsharer.R;
 import com.example.socialsharer.EditProfileActivity;
 import com.example.socialsharer.RegisterActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final String TAG = "LoginActivity";
     private LoginViewModel loginViewModel;
+    private String userEmail;
+    private long userNumber;
+    private FirebaseFirestore db;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        db = FirebaseFirestore.getInstance();
+        getUserNumber();
+
         getSupportActionBar().setTitle(R.string.title_activity_login);
         setContentView(R.layout.activity_login);
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
@@ -121,14 +136,24 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                // If success, pass user email and user number to next activity
+                userEmail = usernameEditText.getText().toString();
+                Intent startNext = new Intent(LoginActivity.this,
+                        MainActivity.class);
+                startNext.putExtra("userNumber", userNumber);
+                startNext.putExtra("email", userEmail);
+                startActivity(startNext);
             }
         });
 
         createAccountTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+                // If create account, pass user number to next activity
+                Intent startNext = new Intent(LoginActivity.this,
+                        MainActivity.class);
+                startNext.putExtra("userNumber", userNumber);
+                startActivity(startNext);
             }
         });
     }
@@ -141,5 +166,26 @@ public class LoginActivity extends AppCompatActivity {
 
     private void showLoginFailed(@StringRes Integer errorString) {
         Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
+    }
+
+    private void getUserNumber(){
+        DocumentReference docRef = db.collection("users").
+                document("record");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        userNumber = (long) document.get("total_user");
+                        Log.d(TAG, "User number:" + userNumber);
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
     }
 }
