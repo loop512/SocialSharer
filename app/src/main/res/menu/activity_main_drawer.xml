@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_account_circle_black_24dp"
+            android:title="@string/menu_profile"
+            android:checked="true"/>
+        <item
+            android:id="@+id/nav_qrshare"
+            android:icon="@drawable/ic_menu_camera"
+            android:title="@string/menu_qrshare" />
+        <item
+            android:id="@+id/nav_mapshare"
+            android:icon="@drawable/ic_map_black_24dp"
+            android:title="@string/menu_mapshare" />
+        <item
+            android:id="@+id/nav_contacts"
+            android:icon="@drawable/ic_contacts_black_24dp"
+            android:title="@string/menu_contacts" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/menu_settings" />
+    </group>
+
+</menu>
