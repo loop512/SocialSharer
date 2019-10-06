@@ -27,6 +27,7 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <string name="error_user_exists">Sorry, this email has already been registered.</string>
 
     //Registration and Edit Profile
     <string name="title_activity_register">Register</string>

@@ -51,14 +51,14 @@ public class MainActivity extends AppCompatActivity
 
         db = FirebaseFirestore.getInstance();
 
-        Intent previous = getIntent();
-        Bundle bundle = previous.getExtras();
-        if (bundle != null){
-            userEmail = (String) bundle.get("email");
-            userNumber = (long) bundle.get("userNumber");
-        }
-        getMyInfo();
-        Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
+//        Intent previous = getIntent();
+//        Bundle bundle = previous.getExtras();
+//        if (bundle != null){
+//            userEmail = (String) bundle.get("email");
+//            userNumber = (long) bundle.get("userNumber");
+//        }
+//        getMyInfo();
+//        Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);

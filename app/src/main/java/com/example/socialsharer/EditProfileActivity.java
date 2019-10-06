@@ -30,13 +30,13 @@ public class EditProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile);
         getSupportActionBar().setTitle(R.string.title_activity_edit_profile);
 
-        Intent previous = getIntent();
-        Bundle bundle = previous.getExtras();
-        if (bundle != null){
-            userEmail = (String) bundle.get("email");
-            userNumber = (long) bundle.get("userNumber");
-        }
-        Log.i(TAG, "Register email: " + userEmail + " userNumber" + userNumber);
+//        Intent previous = getIntent();
+//        Bundle bundle = previous.getExtras();
+//        if (bundle != null){
+//            userEmail = (String) bundle.get("email");
+////            userNumber = (long) bundle.get("userNumber");
+//        }
+//        Log.i(TAG, "Register email: " + userEmail + " userNumber" + userNumber);
 
         final Button saveButton = findViewById(R.id.edit_save_profile);
         saveButton.setOnClickListener(new View.OnClickListener() {
