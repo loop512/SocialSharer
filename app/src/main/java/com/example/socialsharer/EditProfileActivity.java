@@ -3,10 +3,19 @@ package com.example.socialsharer;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.google.android.gms.auth.api.signin.internal.Storage;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+
+import io.grpc.Context;
 
 public class EditProfileActivity extends AppCompatActivity {
 
@@ -40,5 +49,14 @@ public class EditProfileActivity extends AppCompatActivity {
                 startActivity(startNext);
             }
         });
+    }
+
+    public void uploadImage(){
+        String storePath = userEmail + ".jpg";
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageReference = storage.getReference();
+        StorageReference imageRef = storageReference.child(storePath);
+
+        File file = new File(".R");
     }
 }

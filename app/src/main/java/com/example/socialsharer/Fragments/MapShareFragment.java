@@ -3,6 +3,9 @@ package com.example.socialsharer.Fragments;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -25,6 +28,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -35,7 +40,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
@@ -71,6 +78,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private ArrayList<Integer> selectedIndex = new ArrayList();
     private int targeNumber = 3;
     private String nickName;
+        private CircleImage imageHandler = new CircleImage();
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -292,21 +300,27 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         String userName = user.getNickName();
                         String introduction = user.getIntroduction();
                         LatLng userLocation = new LatLng(latitude, longitude);
+                        // Using default image now
+                        Bitmap bitmap = BitmapFactory.decodeResource(
+                                getResources(), R.drawable.unknown);
+                        Bitmap smallBitMap = scaleBitmap(bitmap, 220, false);
+                        Bitmap handledBitmap = imageHandler.transform(smallBitMap);
+                        BitmapDescriptor bitmapDescriptor =
+                                BitmapDescriptorFactory.fromBitmap(handledBitmap);
                         if (introduction != null) {
                             googleMap.addMarker(new MarkerOptions()
                                     .alpha(opacity)
                                     .position(userLocation)
                                     .title(userName)
                                     .snippet(introduction)
-                                    .flat(false));
+                                    .icon(bitmapDescriptor));
                         } else {
                             googleMap.addMarker(new MarkerOptions()
                                     .alpha(opacity)
                                     .position(userLocation)
                                     .title(userName)
-                                    .flat(false));
+                                    .icon(bitmapDescriptor));
                         }
-
                     }
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
@@ -381,5 +395,19 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         }
                     }
                 });
+    }
+
+    // Scale a bit map image
+    private Bitmap scaleBitmap(Bitmap realImage, float maxImageSize,
+                                   boolean filter) {
+        float ratio = Math.min(
+                (float) maxImageSize / realImage.getWidth(),
+                (float) maxImageSize / realImage.getHeight());
+        int width = Math.round((float) ratio * realImage.getWidth());
+        int height = Math.round((float) ratio * realImage.getHeight());
+
+        Bitmap newBitmap = Bitmap.createScaledBitmap(realImage, width,
+                height, filter);
+        return newBitmap;
     }
 }
