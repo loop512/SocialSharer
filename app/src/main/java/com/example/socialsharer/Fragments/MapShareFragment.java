@@ -303,7 +303,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         // Using default image now
                         Bitmap bitmap = BitmapFactory.decodeResource(
                                 getResources(), R.drawable.unknown);
-                        Bitmap smallBitMap = scaleBitmap(bitmap, 180, false);
+                        Bitmap smallBitMap = scaleBitmap(bitmap, 160, false);
                         Bitmap handledBitmap = imageHandler.transform(smallBitMap);
                         BitmapDescriptor bitmapDescriptor =
                                 BitmapDescriptorFactory.fromBitmap(handledBitmap);
@@ -375,14 +375,11 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 if (document.get("introduction") != null){
                                     introduction = (String) document.get("introduction");
                                 }
-                                if (document.get("email") != null){
-                                    email = (String) document.get("email");
-                                }
+                                email = document.getId();
                                 User newRecommendUser =
                                         new User(email,
                                                 nickName, introduction, latitude, longitude);
-                                if (newRecommendUser.getEmail() != null
-                                        && newRecommendUser.getEmail().equals(userEmail)){
+                                if (email.equals(userEmail)){
                                     targeNumber = targeNumber - 1;
                                 }
                                 else {
