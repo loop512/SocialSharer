@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity
             userEmail = (String) bundle.get("email");
             userNumber = (long) bundle.get("userNumber");
         }
-        getMyInfo();
+//        getMyInfo();
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
 
         setContentView(R.layout.activity_main);
