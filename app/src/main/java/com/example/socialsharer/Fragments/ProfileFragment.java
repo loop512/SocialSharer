@@ -146,6 +146,7 @@ public class ProfileFragment extends Fragment {
         if(requestCode == PHOTO_SELECTION_REQUEST && resultCode == RESULT_OK){
             Uri uri = data.getData();
 
+
             StorageReference photoPath = storageRef.child(PHOTO);
             photoPath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override

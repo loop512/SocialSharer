@@ -93,6 +93,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="8dp"
+        android:onClick="saveChanges"
         android:text="@string/save_profile"
         app:layout_constraintEnd_toStartOf="@+id/edit_skip"
         app:layout_constraintHorizontal_bias="0.313"
