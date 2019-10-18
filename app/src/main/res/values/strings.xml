@@ -67,6 +67,8 @@
     <string name="enter_wechat_link">Enter your Wechat ID</string>
     <string name="save_socials">Save Details</string>
 
+    //Contacts
+    <string name="search_contacts">Search Contacts</string>
     //Setting
     <string name="logout_button">Sign Out</string>
     <!-- TODO: Remove or change this placeholder text -->

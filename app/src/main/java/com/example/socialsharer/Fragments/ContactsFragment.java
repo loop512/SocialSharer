@@ -1,13 +1,22 @@
 package com.example.socialsharer.Fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ListView;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.socialsharer.ContactProfileActivity;
+import com.example.socialsharer.EditProfileActivity;
 import com.example.socialsharer.R;
+import com.example.socialsharer.data.Contact;
+import com.example.socialsharer.data.ContactAdapter;
+
+import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -26,6 +35,11 @@ public class ContactsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private ArrayList<Contact> contactList;
+    private ListView listView;
+    private ContactAdapter contactAdapter;
+
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -62,6 +76,29 @@ public class ContactsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_contacts, container, false);
+        View view =  inflater.inflate(R.layout.fragment_contacts, container, false);
+        listView = (ListView)view.findViewById(R.id.contact_list);
+        contactList = new ArrayList<Contact>();
+
+        contactList.add(new Contact("Tom", R.drawable.unknown));
+        contactList.add(new Contact("Bob", R.drawable.unknown));
+
+        contactAdapter = new ContactAdapter(getContext(),contactList);
+        listView.setAdapter(contactAdapter);
+
+        listView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener()
+                {
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0, View view,
+                                            int position, long id) {
+
+                        Intent intent = new Intent(getActivity(), ContactProfileActivity.class);
+                        startActivity(intent);
+                    }
+                }
+        );
+
+        return view;
     }
 }
