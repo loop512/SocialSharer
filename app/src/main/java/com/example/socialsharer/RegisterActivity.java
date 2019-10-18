@@ -38,7 +38,6 @@ public class RegisterActivity extends AppCompatActivity {
     private static final String TAG = "RegisterActivity";
     // TODO: change this later to the user's email
 
-    private String userEmail = "test@qq.com";
     private long userNumber;
     private FirebaseFirestore db;
 
@@ -53,12 +52,11 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-//        Intent previous = getIntent();
-//        Bundle bundle = previous.getExtras();
-//        if (bundle != null){
-//            userNumber = (long) bundle.get("userNumber");
-//        }
-//        Log.i(TAG, "Register email: " + userEmail + " userNumber" + userNumber);
+        Intent previous = getIntent();
+        Bundle bundle = previous.getExtras();
+        if (bundle != null){
+            userNumber = (long) bundle.get("userNumber");
+        }
 
         setContentView(R.layout.activity_register);
         getSupportActionBar().setTitle(R.string.title_activity_register);
@@ -82,29 +80,6 @@ public class RegisterActivity extends AppCompatActivity {
         });
     }
 
-
-    public void addUser(){
-        Map<String, Object> user = new HashMap<>();
-        user.put("first", "Ada");
-        user.put("last", "Lovelace");
-        user.put("born", 1815);
-
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
-    }
-
     private void createAccount(String email, String password){
 
         if(!validateForm()){
@@ -124,6 +99,8 @@ public class RegisterActivity extends AppCompatActivity {
                             Intent startNext = new Intent(RegisterActivity.this,
                                     EditProfileActivity.class);
                             startNext.putExtra("email", mEmailField.getText().toString());
+                            startNext.putExtra("name", mFullnameField.getText().toString());
+                            startNext.putExtra("userNumber", userNumber);
                             startActivity(startNext);
                             finish();
                         } else{
