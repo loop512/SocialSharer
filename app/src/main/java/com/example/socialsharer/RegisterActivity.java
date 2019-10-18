@@ -36,7 +36,8 @@ import java.util.regex.Pattern;
 public class RegisterActivity extends AppCompatActivity {
 
     private static final String TAG = "RegisterActivity";
-    // TODO: change this later to the user's email
+    private static final String RECORD = "total_user";
+    private static final String INDEX = "index";
 
     private long userNumber;
     private FirebaseFirestore db;
@@ -157,5 +158,40 @@ public class RegisterActivity extends AppCompatActivity {
             mRePasswordField.setError(null);
         }
         return valid;
+    }
+
+    public void saveChanges(View v){
+        Map<String, Object> change = new HashMap<>();
+        change.put(INDEX, userNumber+1);
+
+        Map<String, Object> record = new HashMap<>();
+        record.put(RECORD, userNumber+1);
+        db.collection("users").document("record").set(record)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Success update to database");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Fail update to database");
+                    }
+                });
+
+        db.collection("users").document(mEmailField.getText().toString()).set(change)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "Success update to database");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Fail update to database");
+                    }
+                });
     }
 }

@@ -60,6 +60,14 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // log out user if already login but restart
+        try{
+            FirebaseAuth.getInstance().signOut();
+            Log.i(TAG, "Restart app, log out");
+        } catch (Exception e){
+           // Start of app, not need to log out
+        }
+
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         getUserNumber();

@@ -33,16 +33,12 @@ public class EditProfileActivity extends AppCompatActivity {
     private static final String DOB = "Data Of Birth";
     private static final String CONTACT_NUMBER = "Contact Number";
     private static final String OCCUPATION = "Occupation";
-    private static final String NICKNAME = "nickName";
-    private static final String RECORD = "total_user";
-    private static final String INDEX = "index";
 
     private EditText editAddress, editDob, editNumber,editJob;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private String email = auth.getCurrentUser().getEmail().toString();
 
-    private String name;
     private long userNumber;
 
     @Override
@@ -59,7 +55,6 @@ public class EditProfileActivity extends AppCompatActivity {
         Intent previous = getIntent();
         Bundle bundle = previous.getExtras();
         if (bundle != null){
-            name = (String) bundle.get("name");
             userNumber = (long) bundle.get("userNumber");
         }
 
@@ -96,27 +91,6 @@ public class EditProfileActivity extends AppCompatActivity {
         change.put(DOB,dob);
         change.put(CONTACT_NUMBER,number);
         change.put(OCCUPATION,job);
-        change.put(NICKNAME, name);
-        change.put(INDEX, userNumber+1);
-
-        Map<String, Object> record = new HashMap<>();
-        record.put(RECORD, userNumber+1);
-        db.collection("users").document("record").set(record)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(EditProfileActivity.this,
-                                "Changes Saved", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(EditProfileActivity.this,
-                                "Error Happened", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, e.toString());
-                    }
-                });
 
         db.collection("users").document(email).set(change)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {

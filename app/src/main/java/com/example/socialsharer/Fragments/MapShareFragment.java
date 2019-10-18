@@ -87,6 +87,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private boolean firstTime = true;
     private StorageReference storageRef;
     public boolean imageDownload = false;
+    private HashMap<String, String> fileLists = new HashMap<String, String>();
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -303,19 +304,56 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         for(User user: recomendUserList) {
             String path = user.getEmail() + "/Photo";
             StorageReference imageRef = storageRef.child(path);
-            final long ONE_MEGABYTE = 1024 * 1024;
-            imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-                    Log.i(TAG, "Downloaded");
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    Log.i(TAG, "Fail to download");
-                }
-            });
+            final Double longitude = user.getLongitude();
+            final Double latitude = user.getLatitude();
+            final float opacity = (float) 0.75;
+            final String name = user.getNickName();
+            final String introduction = user.getIntroduction();
+            final LatLng userLocation = new LatLng(latitude, longitude);
+
+            try{
+                final File localFile = File.createTempFile("images", "jpg");
+                imageRef.getFile(localFile).addOnSuccessListener(
+                        new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                Log.i(TAG, "User image Downloaded");
+                                String path = localFile.getAbsolutePath();
+                                fileLists.put(name, path);
+
+                                Bitmap bitmap = BitmapFactory.decodeFile(path);
+                                addMarker(bitmap, opacity, userLocation, name, introduction);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        Bitmap bitmap = BitmapFactory.decodeResource(
+                                getResources(), R.drawable.unknown);
+                        addMarker(bitmap, opacity, userLocation, name, introduction);
+                        Log.i(TAG, "Fail to download user image, using default");
+                    }
+                });
+            } catch (Exception e){
+                Log.i(TAG, "Fail to create temp file");
+            }
         }
+    }
+
+    public void addMarker(Bitmap bitmap, float opacity, LatLng userLocation,
+                          String name, String introduction){
+        Bitmap smallBitMap = scaleBitmap(bitmap, 170, false);
+        Bitmap handledBitmap = imageHandler.transform(smallBitMap);
+        BitmapDescriptor bitmapDescriptor =
+                BitmapDescriptorFactory.fromBitmap(handledBitmap);
+        MarkerOptions marker = new MarkerOptions()
+                .alpha(opacity)
+                .position(userLocation)
+                .title(name)
+                .icon(bitmapDescriptor);
+        if (introduction != null) {
+            marker.snippet(introduction);
+        }
+        googleMap.addMarker(marker);
     }
 
     public void recommendUser(){
@@ -328,31 +366,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                 Log.i(TAG, "Recommend list size " + recomendUserList.size());
                 if(recomendUserList.size() >= targeNumber){
                     downloadImages();
-                    for (User user: recomendUserList){
-                        Double longitude = user.getLongitude();
-                        Double latitude = user.getLatitude();
-                        float opacity = (float) 0.75;
-                        String userName = user.getNickName();
-                        String introduction = user.getIntroduction();
-                        LatLng userLocation = new LatLng(latitude, longitude);
-                        // Using default image now
-
-                        Bitmap bitmap = BitmapFactory.decodeResource(
-                                getResources(), R.drawable.unknown);
-                        Bitmap smallBitMap = scaleBitmap(bitmap, 160, false);
-                        Bitmap handledBitmap = imageHandler.transform(smallBitMap);
-                        BitmapDescriptor bitmapDescriptor =
-                                BitmapDescriptorFactory.fromBitmap(handledBitmap);
-                        MarkerOptions marker = new MarkerOptions()
-                                .alpha(opacity)
-                                .position(userLocation)
-                                .title(userName)
-                                .icon(bitmapDescriptor);
-                        if (introduction != null) {
-                                marker.snippet(introduction);
-                        }
-                        googleMap.addMarker(marker);
-                    }
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
                     // Wait for another 1 sec
@@ -448,6 +461,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     // Scale a bit map image
     private Bitmap scaleBitmap(Bitmap realImage, float maxImageSize,
                                    boolean filter) {
+        realImage = Bitmap.createScaledBitmap(realImage, 300, 300, false);
         float ratio = Math.min(
                 (float) maxImageSize / realImage.getWidth(),
                 (float) maxImageSize / realImage.getHeight());
