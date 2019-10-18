@@ -62,7 +62,6 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 user_image.setImageBitmap(scaledBitmap);
             }
         }
-
         user_occupation.setText(message + marker.getTitle());
         return view;
     }
