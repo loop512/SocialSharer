@@ -7,7 +7,7 @@ public class User {
     private String introduction;
     private Double latitude;
     private Double longitude;
-
+    private String imagePath = null;
     public User() {}
 
     public User(String email, String nickName, String introduction, Double latitude, Double longitude) {
@@ -16,6 +16,10 @@ public class User {
         this.introduction = introduction;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public void setImagePath(String path){
+        this.imagePath = path;
     }
 
     public String getEmail() {

@@ -97,7 +97,7 @@ public class EditProfileActivity extends AppCompatActivity {
         change.put(OCCUPATION,job);
         change.put(NICKNAME, name);
         change.put(INDEX, userNumber+1);
-        
+
         Map<String, Object> record = new HashMap<>();
         record.put(RECORD, userNumber+1);
         db.collection("users").document("record").set(record)

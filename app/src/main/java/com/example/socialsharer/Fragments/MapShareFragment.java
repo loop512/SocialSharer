@@ -33,6 +33,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -40,6 +42,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -76,10 +81,12 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private String userEmail;
     private long userNumber;
     private ArrayList<Integer> selectedIndex = new ArrayList();
-    private int targeNumber = 1;
+    private int targeNumber = 3;
     private String nickName;
         private CircleImage imageHandler = new CircleImage();
     private boolean firstTime = true;
+    private StorageReference storageRef;
+    public boolean imageDownload = false;
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -291,13 +298,36 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         };
     }
 
+    public void downloadImages(){
+        storageRef = FirebaseStorage.getInstance().getReference();
+        for(User user: recomendUserList) {
+            String path = user.getEmail() + "/Photo";
+            StorageReference imageRef = storageRef.child(path);
+            final long ONE_MEGABYTE = 1024 * 1024;
+            imageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    Log.i(TAG, "Downloaded");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Log.i(TAG, "Fail to download");
+                }
+            });
+        }
+    }
+
     public void recommendUser(){
+        storageRef = FirebaseStorage.getInstance().getReference();
+
         Log.i(TAG, "Check whether recommend users are loaded");
         recommendRunnable = new Runnable() {
             @Override
             public void run() {
-                if(recomendUserList.size() == targeNumber){
-                    // TODO Display recommend points on map
+                Log.i(TAG, "Recommend list size " + recomendUserList.size());
+                if(recomendUserList.size() >= targeNumber){
+                    downloadImages();
                     for (User user: recomendUserList){
                         Double longitude = user.getLongitude();
                         Double latitude = user.getLatitude();
@@ -306,6 +336,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         String introduction = user.getIntroduction();
                         LatLng userLocation = new LatLng(latitude, longitude);
                         // Using default image now
+
                         Bitmap bitmap = BitmapFactory.decodeResource(
                                 getResources(), R.drawable.unknown);
                         Bitmap smallBitMap = scaleBitmap(bitmap, 160, false);
@@ -325,7 +356,11 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
                     // Wait for another 1 sec
-                    updateLocation(userEmail);
+                    randomSelect();
+                    for (int index: selectedIndex){
+                        getDocument(index);
+                        Log.i(TAG, "User: " + index);
+                    }
                     Log.i(TAG, "Still fetching data from server.");
                     recommendHandler.postDelayed(recommendRunnable, 1000);
                 }
@@ -385,8 +420,13 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 }
                                 else {
                                     Log.i(TAG, "add user: " + newRecommendUser.getNickName());
-                                    recomendUserList.add(newRecommendUser);
-                                    Log.i(TAG, "Current size: " + recomendUserList.size());
+                                    if(!containUser(nickName)){
+                                        recomendUserList.add(newRecommendUser);
+                                        Log.i(TAG, "Current size: " + recomendUserList.size());
+                                    }
+                                    if(recomendUserList.size() == targeNumber){
+                                        break;
+                                    }
                                 }
                             }
                         } else {
@@ -394,6 +434,15 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         }
                     }
                 });
+    }
+
+    private boolean containUser(String nickName){
+        for(User user: recomendUserList){
+            if (user.getNickName().equals((nickName))){
+                return true;
+            }
+        }
+        return false;
     }
 
     // Scale a bit map image
