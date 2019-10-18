@@ -86,6 +86,19 @@ public class ContactsFragment extends Fragment {
         contactAdapter = new ContactAdapter(getContext(),contactList);
         listView.setAdapter(contactAdapter);
 
+        listView.setOnItemClickListener(
+                new AdapterView.OnItemClickListener()
+                {
+                    @Override
+                    public void onItemClick(AdapterView<?> arg0, View view,
+                                            int position, long id) {
+
+                        Intent intent = new Intent(getActivity(), ContactProfileActivity.class);
+                        startActivity(intent);
+                    }
+                }
+        );
+
         return view;
     }
 }
