@@ -33,11 +33,13 @@ public class EditProfileActivity extends AppCompatActivity {
     private static final String DOB = "Data Of Birth";
     private static final String CONTACT_NUMBER = "Contact Number";
     private static final String OCCUPATION = "Occupation";
+    private static final String NICK_NAME = "nickName";
 
     private EditText editAddress, editDob, editNumber,editJob;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private String email = auth.getCurrentUser().getEmail().toString();
+    private String nickName = auth.getCurrentUser().getDisplayName().toString();
 
 //    private String userEmail;
 //    private long userNumber;
@@ -70,6 +72,7 @@ public class EditProfileActivity extends AppCompatActivity {
                // startNext.putExtra("userNumber", userNumber);
                 // startNext.putExtra("email", userEmail);
                 startActivity(startNext);
+                finish();
             }
         });
     }
@@ -93,6 +96,7 @@ public class EditProfileActivity extends AppCompatActivity {
         change.put(DOB,dob);
         change.put(CONTACT_NUMBER,number);
         change.put(OCCUPATION,job);
+        change.put(NICK_NAME,nickName);
 
         db.collection("users").document(email).set(change)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
