@@ -54,3 +54,4 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
 
         return convertView;
     }
+}
