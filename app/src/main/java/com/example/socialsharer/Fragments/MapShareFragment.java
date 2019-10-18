@@ -76,9 +76,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private String userEmail;
     private long userNumber;
     private ArrayList<Integer> selectedIndex = new ArrayList();
-    private int targeNumber = 3;
+    private int targeNumber = 1;
     private String nickName;
         private CircleImage imageHandler = new CircleImage();
+    private boolean firstTime = true;
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -154,19 +155,11 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     .getSystemService(Context.LOCATION_SERVICE);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     100,100,this);
-            location = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
-            this.longitude = location.getLongitude();
-            this.latitude = location.getLatitude();
 
-            updateLocation(userEmail);
             timeHandler = new Handler();
             timeUpdate();
             timeHandler.postDelayed(timeRunnable, 300000);
 
-            // Move camera to current location when open the app
-            LatLng latLng = new LatLng(this.latitude, this.longitude);
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 8);
-            googleMap.animateCamera(cameraUpdate);
             Log.i(TAG, "Initiate success");
 
             randomSelect();
@@ -207,6 +200,18 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
     @Override
     public void onLocationChanged(Location location) {
+        if(firstTime){
+            this.longitude = location.getLongitude();
+            this.latitude = location.getLatitude();
+
+            updateLocation(userEmail);
+            // Move camera to current location when open the app
+            LatLng latLng = new LatLng(this.latitude, this.longitude);
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 8);
+            googleMap.animateCamera(cameraUpdate);
+            firstTime = false;
+
+        }
         this.longitude = location.getLongitude();
         this.latitude = location.getLatitude();
     }
@@ -307,20 +312,15 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         Bitmap handledBitmap = imageHandler.transform(smallBitMap);
                         BitmapDescriptor bitmapDescriptor =
                                 BitmapDescriptorFactory.fromBitmap(handledBitmap);
+                        MarkerOptions marker = new MarkerOptions()
+                                .alpha(opacity)
+                                .position(userLocation)
+                                .title(userName)
+                                .icon(bitmapDescriptor);
                         if (introduction != null) {
-                            googleMap.addMarker(new MarkerOptions()
-                                    .alpha(opacity)
-                                    .position(userLocation)
-                                    .title(userName)
-                                    .snippet(introduction)
-                                    .icon(bitmapDescriptor));
-                        } else {
-                            googleMap.addMarker(new MarkerOptions()
-                                    .alpha(opacity)
-                                    .position(userLocation)
-                                    .title(userName)
-                                    .icon(bitmapDescriptor));
+                                marker.snippet(introduction);
                         }
+                        googleMap.addMarker(marker);
                     }
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
@@ -379,7 +379,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 User newRecommendUser =
                                         new User(email,
                                                 nickName, introduction, latitude, longitude);
-                                if (email.equals(userEmail)){
+                                if (email.equals(userEmail)||
+                                        latitude == null || longitude == null){
                                     targeNumber = targeNumber - 1;
                                 }
                                 else {

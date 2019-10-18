@@ -3,11 +3,16 @@ package com.example.socialsharer.ui.login;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,6 +25,7 @@ import android.content.Intent;
 
 import com.example.socialsharer.ForgotPasswordActivity;
 import com.example.socialsharer.MainActivity;
+import com.example.socialsharer.Manifest;
 import com.example.socialsharer.R;
 import com.example.socialsharer.RegisterActivity;
 import com.google.android.gms.tasks.OnCompleteListener;

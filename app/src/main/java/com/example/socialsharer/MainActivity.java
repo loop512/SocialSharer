@@ -48,10 +48,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        requestPermissions();
         db = FirebaseFirestore.getInstance();
 
-       Intent previous = getIntent();
+        Intent previous = getIntent();
         Bundle bundle = previous.getExtras();
         if (bundle != null){
             userEmail = (String) bundle.get("email");
@@ -164,15 +164,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * this method check permission and return current state of permission need.
-     */
-    private boolean checkPermissions() {
-        int permissionState = ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION);
-        return permissionState == PackageManager.PERMISSION_GRANTED;
-    }
-
-    /**
      * this method request to permission asked.
      */
     private void requestPermissions() {
@@ -180,38 +171,24 @@ public class MainActivity extends AppCompatActivity
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION);
 
+        String[] permissions = new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.INTERNET,
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+        };
+
         if (shouldProvideRationale) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
         } else {
             Log.i(TAG, "Requesting permission");
             // previously and checked "Never ask again".
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    permissions,
                     REQUEST_PERMISSIONS_REQUEST_CODE);
-        }
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        Log.i(TAG, "onRequestPermissionResult");
-        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.length <= 0) {
-                // If user interaction was interrupted, the permission request is cancelled and you
-                // receive empty arrays.
-                Log.i(TAG, "User interaction was cancelled.");
-            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission was granted. Kick off the process of building and connecting
-                // GoogleApiClient.
-                openMapActivity();
-                Log.i(TAG, "User permissions required by map services are granted.");
-            } else {
-                // Permission denied.
-                Log.w(TAG, "User permissions required by map services are denied.");
-            }
         }
     }
 
