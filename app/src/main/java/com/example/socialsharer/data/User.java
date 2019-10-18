@@ -7,6 +7,7 @@ public class User {
     private String introduction;
     private Double latitude;
     private Double longitude;
+    private String occupation;
     private String imagePath = null;
     public User() {}
 

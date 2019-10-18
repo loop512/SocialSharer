@@ -74,6 +74,7 @@ public class ProfileFragment extends Fragment {
     private ImageView editPhoto;
     private ImageView editSocials;
     private CircleImageView profileImage;
+    private long userNumber;
     //////////////////////////////////////////////////////////////////////////////////////////
 
     public ProfileFragment() {
@@ -101,6 +102,10 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle bundle = getArguments();
+        userNumber = bundle.getLong("userNumber");
+
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -130,6 +135,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(),EditProfileActivity.class);
+                intent.putExtra("userNumber", userNumber);
                 startActivity(intent);
             }
         });
@@ -138,6 +144,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), EditSocialsActivity.class);
+                intent.putExtra("userNumber", userNumber);
                 startActivity(intent);
             }
         });
@@ -147,6 +154,7 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
+                intent.putExtra("userNumber", userNumber);
                 startActivityForResult(intent, PHOTO_SELECTION_REQUEST);
             }
         });

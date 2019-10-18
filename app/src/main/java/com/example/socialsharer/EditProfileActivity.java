@@ -33,12 +33,12 @@ public class EditProfileActivity extends AppCompatActivity {
     private static final String DOB = "Data Of Birth";
     private static final String CONTACT_NUMBER = "Contact Number";
     private static final String OCCUPATION = "Occupation";
+    private static final String INTRODUCE = "Introduce";
 
-    private EditText editAddress, editDob, editNumber,editJob;
+    private EditText editAddress, editDob, editNumber, editJob, editIntroduce;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private String email = auth.getCurrentUser().getEmail().toString();
-
     private long userNumber;
 
     @Override
@@ -51,6 +51,7 @@ public class EditProfileActivity extends AppCompatActivity {
         editDob = findViewById(R.id.edit_dob);
         editNumber = findViewById(R.id.edit_number);
         editJob = findViewById(R.id.edit_profession);
+        editIntroduce = findViewById(R.id.edit_intro);
 
         Intent previous = getIntent();
         Bundle bundle = previous.getExtras();
@@ -64,8 +65,8 @@ public class EditProfileActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent startNext = new Intent(EditProfileActivity.this,
                         MainActivity.class);
-               // startNext.putExtra("userNumber", userNumber);
-                // startNext.putExtra("email", userEmail);
+                startNext.putExtra("userNumber", userNumber);
+                startNext.putExtra("email", email);
                 startActivity(startNext);
                 finish();
             }
@@ -85,6 +86,7 @@ public class EditProfileActivity extends AppCompatActivity {
         String dob = editDob.getText().toString();
         String number = editNumber.getText().toString();
         String job = editJob.getText().toString();
+        String introduce = editIntroduce.getText().toString();
 
         Map<String, Object> change = new HashMap<>();
         change.put(HOME_ADDRESS,address);
@@ -92,13 +94,15 @@ public class EditProfileActivity extends AppCompatActivity {
         change.put(CONTACT_NUMBER,number);
         change.put(OCCUPATION,job);
 
-        db.collection("users").document(email).set(change)
+
+        db.collection("users").document(email).update(change)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(EditProfileActivity.this, "Changes Saved", Toast.LENGTH_SHORT).show();
                         Intent startNext = new Intent(EditProfileActivity.this,
                                 MainActivity.class);
+                        startNext.putExtra("userNumber", userNumber);
                         startActivity(startNext);
                     }
                 })

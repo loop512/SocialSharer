@@ -180,7 +180,7 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 });
 
-        db.collection("users").document(mEmailField.getText().toString()).set(change)
+        db.collection("users").document(mEmailField.getText().toString()).update(change)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

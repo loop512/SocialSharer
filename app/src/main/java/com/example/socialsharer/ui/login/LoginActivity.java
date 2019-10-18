@@ -189,6 +189,7 @@ public class LoginActivity extends AppCompatActivity {
                 // If create account, pass user number to next activity
                 Intent startNext = new Intent(LoginActivity.this,
                         ForgotPasswordActivity.class);
+                startNext.putExtra("userNumber", userNumber);
                 startActivity(startNext);
             }
         });

@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity
             userNumber = (long) bundle.get("userNumber");
         }
 //        getMyInfo();
+
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
 
         setContentView(R.layout.activity_main);
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setCheckedItem(R.id.nav_profile);
         Fragment fragment = new ProfileFragment();
+        fragment.setArguments(bundle);
         setTitle(R.string.menu_profile);
         loadFragment(fragment);
         navigationView.setNavigationItemSelectedListener(this);
@@ -192,32 +194,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void getMyInfo(){
-
-        DocumentReference docRef = db.collection("users").
-                document(userEmail);
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        if (document.get("nickName") != null){
-                            nickName = (String) document.get("nickName");
-                        }
-                        if (document.get("introduction") != null){
-                            introduction = (String) document.get("introduction");
-                        }
-                        Log.d(TAG, "User nick name:" + nickName);
-                    } else {
-                        Log.d(TAG, "No such document");
-                    }
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                }
-            }
-        });
-    }
 }
 
 
