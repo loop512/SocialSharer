@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.socialsharer.EditProfileActivity;
+import com.example.socialsharer.EditSocialsActivity;
 import com.example.socialsharer.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -69,6 +70,7 @@ public class ProfileFragment extends Fragment {
     private TextView profileName, profileJob, profileAddress, profileNumber,profileEmail;
     private ImageView editDetail;
     private ImageView editPhoto;
+    private ImageView editSocials;
     private CircleImageView profileImage;
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -118,12 +120,21 @@ public class ProfileFragment extends Fragment {
         profileNumber = view.findViewById(R.id.profile_number);
         editDetail = view.findViewById(R.id.edit_details);
         editPhoto = view.findViewById(R.id.edit_image);
+        editSocials = view.findViewById(R.id.edit_socials);
         profileImage = view.findViewById(R.id.profile_image);
 
         editDetail.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(),EditProfileActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        editSocials.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), EditSocialsActivity.class);
                 startActivity(intent);
             }
         });

@@ -204,6 +204,13 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="20dp"
                     android:text="@string/facebook"/>
+                <TextView
+                    android:id="@+id/profile_facebook_link"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="20dp"
+                    android:text="@string/facebook_link"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_marginTop="25dp"
@@ -224,6 +231,13 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="20dp"
                     android:text="@string/twitter"/>
+                <TextView
+                    android:id="@+id/profile_twitter_link"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="20dp"
+                    android:text="@string/twitter_link"/>
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
@@ -244,6 +258,13 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="20dp"
                     android:text="@string/instagram"/>
+                <TextView
+                    android:id="@+id/profile_instagram_link"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="20dp"
+                    android:text="@string/instagram_link"/>
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
@@ -264,6 +285,13 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="20dp"
                     android:text="@string/wechat"/>
+                <TextView
+                    android:id="@+id/profile_wechat_link"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="20dp"
+                    android:text="@string/wechat_link"/>
             </LinearLayout>
             <LinearLayout
                 android:orientation="horizontal"
@@ -284,6 +312,13 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="20dp"
                     android:text="@string/linkedin"/>
+                <TextView
+                    android:id="@+id/profile_linkedin_link"
+                    android:layout_gravity="center_vertical"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="20dp"
+                    android:text="@string/linkedin_link"/>
             </LinearLayout>
         </LinearLayout>
     </RelativeLayout>
