@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="351dp"
+    android:layout_height="180dp"
+    android:background="@drawable/background"
+    android:adjustViewBounds="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="351dp"
+        android:layout_height="180dp"
+        android:adjustViewBounds="true">
+
+        <ImageView
+            android:id="@+id/user_image"
+            android:layout_width="100dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="22dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/unknown" />
+
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="221dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="10dp"
+            android:adjustViewBounds="true"
+            android:text="TextView"
+            android:textAlignment="textStart"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/user_image"
+            app:layout_constraintTop_toTopOf="@+id/user_image" />
+
+        <TextView
+            android:id="@+id/user_introduction"
+            android:layout_width="214dp"
+            android:layout_height="37dp"
+            android:layout_marginStart="10dp"
+            android:adjustViewBounds="true"
+            android:text="TextView"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/user_image"
+            app:layout_constraintTop_toBottomOf="@+id/user_name" />
+
+        <ImageView
+            android:id="@+id/icon_wechat"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:adjustViewBounds="true"
+            app:layout_constraintStart_toStartOf="@+id/user_image"
+            app:layout_constraintTop_toBottomOf="@+id/user_image"
+            app:srcCompat="@drawable/wechat" />
+
+        <ImageView
+            android:id="@+id/icon_facebook"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:adjustViewBounds="true"
+            app:layout_constraintStart_toEndOf="@+id/icon_wechat"
+            app:layout_constraintTop_toBottomOf="@+id/user_image"
+            app:srcCompat="@drawable/facebook" />
+
+        <ImageView
+            android:id="@+id/icon_twitter"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:adjustViewBounds="true"
+            app:layout_constraintStart_toEndOf="@+id/icon_facebook"
+            app:layout_constraintTop_toBottomOf="@+id/user_image"
+            app:srcCompat="@drawable/twitter" />
+
+        <ImageView
+            android:id="@+id/icon_ins"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:adjustViewBounds="true"
+            app:layout_constraintStart_toEndOf="@+id/icon_twitter"
+            app:layout_constraintTop_toBottomOf="@+id/user_image"
+            app:srcCompat="@drawable/instagram" />
+
+        <ImageView
+            android:id="@+id/icon_link"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:adjustViewBounds="true"
+            app:layout_constraintStart_toEndOf="@+id/icon_ins"
+            app:layout_constraintTop_toBottomOf="@+id/user_image"
+            app:srcCompat="@drawable/linkedin" />
+
+        <TextView
+            android:id="@+id/user_occupation"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:text="TextView"
+            android:textSize="14sp"
+            android:textStyle="italic"
+            app:layout_constraintTop_toBottomOf="@+id/icon_ins"
+            app:layout_constraintStart_toStartOf="@+id/user_image"
+            tools:layout_editor_absoluteX="17dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</LinearLayout>

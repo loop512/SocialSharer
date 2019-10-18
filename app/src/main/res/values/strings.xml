@@ -39,6 +39,7 @@
     <string name="birthdate">Date Of Birth</string>
     <string name="contact_number">Contact Number</string>
     <string name="profession">Profession</string>
+    <string name="Introduction">Briefly Introduce Yourself</string>
 
     //Change Password
     <string name="title_activity_forgot_password">Confirm Email</string>

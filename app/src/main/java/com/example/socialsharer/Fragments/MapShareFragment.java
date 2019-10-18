@@ -86,7 +86,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         private CircleImage imageHandler = new CircleImage();
     private boolean firstTime = true;
     private StorageReference storageRef;
-    public boolean imageDownload = false;
     private HashMap<String, String> fileLists = new HashMap<String, String>();
 
     public MapShareFragment() {
@@ -179,6 +178,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             recommendHandler = new Handler();
             recommendUser();
             recommendHandler.postDelayed(recommendRunnable, 1000);
+
+            CustomInfoWindowAdapter customInfoWindow = new CustomInfoWindowAdapter(getContext());
+            map.setInfoWindowAdapter(customInfoWindow);
+
 
         } else {
             Log.w(TAG, "User permission not granted");
@@ -310,7 +313,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             final String name = user.getNickName();
             final String introduction = user.getIntroduction();
             final LatLng userLocation = new LatLng(latitude, longitude);
-
+            final String occupation = user.getOccupation();
             try{
                 final File localFile = File.createTempFile("images", "jpg");
                 imageRef.getFile(localFile).addOnSuccessListener(
@@ -322,14 +325,16 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 fileLists.put(name, path);
 
                                 Bitmap bitmap = BitmapFactory.decodeFile(path);
-                                addMarker(bitmap, opacity, userLocation, name, introduction);
+                                addMarker(bitmap, opacity, userLocation,
+                                        name, introduction, occupation);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         Bitmap bitmap = BitmapFactory.decodeResource(
                                 getResources(), R.drawable.unknown);
-                        addMarker(bitmap, opacity, userLocation, name, introduction);
+                        addMarker(bitmap, opacity, userLocation,
+                                name, introduction, occupation);
                         Log.i(TAG, "Fail to download user image, using default");
                     }
                 });
@@ -340,7 +345,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     }
 
     public void addMarker(Bitmap bitmap, float opacity, LatLng userLocation,
-                          String name, String introduction){
+                          String name, String introduction, String occupation){
         Bitmap smallBitMap = scaleBitmap(bitmap, 170, false);
         Bitmap handledBitmap = imageHandler.transform(smallBitMap);
         BitmapDescriptor bitmapDescriptor =
@@ -350,9 +355,11 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                 .position(userLocation)
                 .title(name)
                 .icon(bitmapDescriptor);
+        String info = "";
         if (introduction != null) {
-            marker.snippet(introduction);
+            info += introduction;
         }
+        marker.snippet(info);
         googleMap.addMarker(marker);
     }
 
@@ -411,6 +418,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 Double latitude = null;
                                 Double longitude = null;
                                 String email = null;
+                                String occupation = null;
                                 if (document.get("nickName") != null){
                                     nickName = (String) document.get("nickName");
                                 }
@@ -420,13 +428,16 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 if (document.get("longitude") != null){
                                     longitude = (Double) document.get("longitude");
                                 }
-                                if (document.get("introduction") != null){
-                                    introduction = (String) document.get("introduction");
+                                if (document.get("Introduction") != null){
+                                    introduction = (String) document.get("Introduction");
+                                }
+                                if (document.get("Occupation") != null){
+                                    occupation = (String) document.get("Occupation");
                                 }
                                 email = document.getId();
                                 User newRecommendUser =
-                                        new User(email,
-                                                nickName, introduction, latitude, longitude);
+                                        new User(email, nickName, introduction,
+                                                latitude, longitude, occupation);
                                 if (email.equals(userEmail)||
                                         latitude == null || longitude == null){
                                     targeNumber = targeNumber - 1;

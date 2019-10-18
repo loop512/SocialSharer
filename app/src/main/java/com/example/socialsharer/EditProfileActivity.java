@@ -33,7 +33,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private static final String DOB = "Data Of Birth";
     private static final String CONTACT_NUMBER = "Contact Number";
     private static final String OCCUPATION = "Occupation";
-    private static final String INTRODUCE = "Introduce";
+    private static final String INTRODUCE = "Introduction";
 
     private EditText editAddress, editDob, editNumber, editJob, editIntroduce;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -93,7 +93,7 @@ public class EditProfileActivity extends AppCompatActivity {
         change.put(DOB,dob);
         change.put(CONTACT_NUMBER,number);
         change.put(OCCUPATION,job);
-
+        change.put(INTRODUCE, introduce);
 
         db.collection("users").document(email).update(change)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
