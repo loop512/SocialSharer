@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.example.socialsharer.EditProfileActivity;
 import com.example.socialsharer.EditSocialsActivity;
 import com.example.socialsharer.R;
@@ -35,6 +36,7 @@ import com.squareup.picasso.Picasso;
 import javax.annotation.Nullable;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.grpc.Context;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -111,8 +113,8 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate (R.layout.fragment_profile, container, false);
-        ImageView profileImage = (ImageView)view.findViewById(R.id.profile_image);
-        profileImage.setImageResource(R.drawable.unknown);
+//        ImageView profileImage = (ImageView)view.findViewById(R.id.profile_image);
+
         profileAddress = view.findViewById(R.id.profile_address);
         profileEmail = view.findViewById(R.id.profile_email);
         profileJob =  view.findViewById(R.id.profile_profession);
@@ -122,6 +124,7 @@ public class ProfileFragment extends Fragment {
         editPhoto = view.findViewById(R.id.edit_image);
         editSocials = view.findViewById(R.id.edit_socials);
         profileImage = view.findViewById(R.id.profile_image);
+//        profileImage.setImageResource(R.drawable.unknown);
 
         editDetail.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -147,6 +150,21 @@ public class ProfileFragment extends Fragment {
                 startActivityForResult(intent, PHOTO_SELECTION_REQUEST);
             }
         });
+
+        storageRef.child(PHOTO).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.d("URI", uri.toString());
+                Glide.with(ProfileFragment.this).load(uri).into(profileImage);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("Load Image Exception", e.toString());
+                profileImage.setImageResource(R.drawable.unknown);
+            }
+        });
+
         return view;
     }
 
@@ -155,14 +173,15 @@ public class ProfileFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode == PHOTO_SELECTION_REQUEST && resultCode == RESULT_OK){
-            Uri uri = data.getData();
+            final Uri uri = data.getData();
 
 
-            StorageReference photoPath = storageRef.child(PHOTO);
+            final StorageReference photoPath = storageRef.child(PHOTO);
             photoPath.putFile(uri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     Toast.makeText(getActivity(), "Successfully uploaded", Toast.LENGTH_SHORT).show();
+                    Glide.with(ProfileFragment.this).load(uri).into(profileImage);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override

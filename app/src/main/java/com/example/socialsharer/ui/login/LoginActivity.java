@@ -73,6 +73,18 @@ public class LoginActivity extends AppCompatActivity {
         mPasswordField = findViewById(R.id.password);
         loginButton = findViewById(R.id.login);
         createAccountTextView = findViewById(R.id.createAccount);
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null){
+            Intent startNext = new Intent(LoginActivity.this,
+                    MainActivity.class);
+            startNext.putExtra("email", user.getEmail());
+            SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
+            long userNumber = shared.getLong("userNumber", 0);
+            startNext.putExtra("userNumber", userNumber);
+            startActivity(startNext);
+            finish();
+        }
         forgotPasswordTextView = findViewById(R.id.forgotPassword);
 //        final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
@@ -205,6 +217,9 @@ public class LoginActivity extends AppCompatActivity {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         userNumber = (long) document.get("total_user");
+                        SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = shared.edit();
+                        editor.putLong("userNumber", userNumber).commit();
                         Log.d(TAG, "User number:" + userNumber);
                     } else {
                         Log.d(TAG, "No such document");

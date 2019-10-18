@@ -72,6 +72,7 @@ public class EditProfileActivity extends AppCompatActivity {
                // startNext.putExtra("userNumber", userNumber);
                 // startNext.putExtra("email", userEmail);
                 startActivity(startNext);
+                finish();
             }
         });
     }
