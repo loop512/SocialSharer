@@ -326,7 +326,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
                                 Bitmap bitmap = BitmapFactory.decodeFile(path);
                                 addMarker(bitmap, opacity, userLocation,
-                                        name, introduction, occupation);
+                                        name, introduction, path);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -334,7 +334,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         Bitmap bitmap = BitmapFactory.decodeResource(
                                 getResources(), R.drawable.unknown);
                         addMarker(bitmap, opacity, userLocation,
-                                name, introduction, occupation);
+                                name, introduction, null);
                         Log.i(TAG, "Fail to download user image, using default");
                     }
                 });
@@ -345,7 +345,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     }
 
     public void addMarker(Bitmap bitmap, float opacity, LatLng userLocation,
-                          String name, String introduction, String occupation){
+                          String name, String introduction, String path_userImage){
         Bitmap smallBitMap = scaleBitmap(bitmap, 170, false);
         Bitmap handledBitmap = imageHandler.transform(smallBitMap);
         BitmapDescriptor bitmapDescriptor =
@@ -355,9 +355,14 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                 .position(userLocation)
                 .title(name)
                 .icon(bitmapDescriptor);
-        String info = "";
+        String info = "introduction|";
         if (introduction != null) {
-            info += introduction;
+            info += introduction+"&";
+        } else {
+            info += "*null*" + "&";
+        }
+        if (path_userImage != null) {
+            info += "path|" + path_userImage+"&";
         }
         marker.snippet(info);
         googleMap.addMarker(marker);
@@ -392,7 +397,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         int maxIndex = new Long(userNumber).intValue();
         ArrayList selectedList = new ArrayList();
         Random generater = new Random();
-        int length = selectedList.size();
         for (int currentNum = 0; currentNum < targeNumber; currentNum ++){
             int nextInt = generater.nextInt(maxIndex);
             while (selectedList.contains(nextInt)) {
