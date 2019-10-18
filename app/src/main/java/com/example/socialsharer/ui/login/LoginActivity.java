@@ -25,7 +25,6 @@ import android.content.Intent;
 
 import com.example.socialsharer.ForgotPasswordActivity;
 import com.example.socialsharer.MainActivity;
-import com.example.socialsharer.Manifest;
 import com.example.socialsharer.R;
 import com.example.socialsharer.RegisterActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
