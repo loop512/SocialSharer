@@ -3,11 +3,16 @@ package com.example.socialsharer.ui.login;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.content.Intent;
 
+import com.example.socialsharer.ForgotPasswordActivity;
 import com.example.socialsharer.MainActivity;
 import com.example.socialsharer.R;
 import com.example.socialsharer.RegisterActivity;
@@ -48,6 +54,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText mPasswordField;
     private TextView createAccountTextView;
     private Button loginButton;
+    private TextView forgotPasswordTextView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,6 +85,7 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(startNext);
             finish();
         }
+        forgotPasswordTextView = findViewById(R.id.forgotPassword);
 //        final ProgressBar loadingProgressBar = findViewById(R.id.loading);
 
 //        loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
@@ -164,6 +172,16 @@ public class LoginActivity extends AppCompatActivity {
 //                startNext.putExtra("userNumber", userNumber);
 //                startNext.putExtra("email", userEmail);
 //                startActivity(startNext);
+            }
+        });
+
+        forgotPasswordTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // If create account, pass user number to next activity
+                Intent startNext = new Intent(LoginActivity.this,
+                        ForgotPasswordActivity.class);
+                startActivity(startNext);
             }
         });
 

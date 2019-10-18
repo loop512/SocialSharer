@@ -31,7 +31,7 @@
 
     //Registration and Edit Profile
     <string name="title_activity_register">Register</string>
-    <string name="confirm_password">Confirm Password</string>
+    <string name="confirm_password">Repeat Password</string>
     <string name="title_activity_edit_profile">Edit Profile</string>
     <string name="save_profile">Save Profile</string>
     <string name="full_name">Full Name</string>
@@ -40,15 +40,31 @@
     <string name="contact_number">Contact Number</string>
     <string name="profession">Profession</string>
 
+    //Change Password
+    <string name="title_activity_forgot_password">Confirm Email</string>
+    <string name="title_activity_change_password">Change Password</string>
+    <string name="next">Next</string>
+
     //Profile
     <string name="profile_details">Profile Details</string>
     <string name="social_networks">Social Network Details</string>
-    <string name="title_activity_edit_socials">Edit Social Networks</string>
-    <string name="facebook">Facebook</string>
-    <string name="twitter">Twitter</string>
-    <string name="instagram">Instagram</string>
-    <string name="linkedin">Linkedin</string>
-    <string name="wechat">Wechat</string>
+    <string name="title_activity_edit_socials">Edit Social Network Details</string>
+    <string name="facebook">Facebook: </string>
+    <string name="facebook_link"></string>
+    <string name="enter_facebook_link">Enter your Facebook link</string>
+    <string name="twitter">Twitter: </string>
+    <string name="twitter_link"></string>
+    <string name="enter_twitter_link">Enter your Twitter link</string>
+    <string name="instagram">Instagram: </string>
+    <string name="instagram_link"></string>
+    <string name="enter_instagram_link">Enter your Instagram link</string>
+    <string name="linkedin">Linkedin: </string>
+    <string name="linkedin_link"></string>
+    <string name="enter_linkedin_link">Enter your LinkedIn link</string>
+    <string name="wechat">Wechat: </string>
+    <string name="wechat_link"></string>
+    <string name="enter_wechat_link">Enter your Wechat ID</string>
+    <string name="save_socials">Save Details</string>
 
     //Setting
     <string name="logout_button">Sign Out</string>
