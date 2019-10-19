@@ -49,6 +49,7 @@ public class ContactsFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     private static final String TAG = "ContactsFragment";
 
+    private int state = 3;
     private String local_path;
     private String userEmail;
     private long userNumber;
@@ -61,6 +62,10 @@ public class ContactsFragment extends Fragment {
     private FirebaseFirestore db;
     private SearchView search;
     private ArrayList<User> contactUserList = new ArrayList<>();
+    private int emptyId = R.id.empty;
+    private int listViewId = R.id.contact_list;
+    private int layoutId = R.layout.fragment_contacts;
+    private int searchId = R.id.search_contacts;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -101,21 +106,18 @@ public class ContactsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_contacts, container, false);
-        listView = view.findViewById(R.id.contact_list);
-        search = view.findViewById(R.id.search_contacts);
+        View view =  inflater.inflate(layoutId, container, false);
+        listView = view.findViewById(listViewId);
+        search = view.findViewById(searchId);
 
-        //listView.setVisibility(View.INVISIBLE);
         search.setVisibility(View.INVISIBLE);
-        //Drawable drawable = getResources().getDrawable(R.drawable.empty_contact_background);
-        //view.setBackground(drawable);
 
         contactList = new ArrayList<>();
-        listView.setEmptyView(view.findViewById(R.id.empty));
+        listView.setEmptyView(view.findViewById(emptyId));
         contactAdapter = new ContactAdapter(getContext(),contactList);
         listView.setAdapter(contactAdapter);
 
-        getList(3);
+        getList(state);
 
         listView.setOnItemClickListener(
                 new AdapterView.OnItemClickListener()
@@ -196,7 +198,7 @@ public class ContactsFragment extends Fragment {
         });
     }
 
-    private void getList(final long state){
+    public void getList(final long state){
         final DocumentReference documentRef = db.collection("request")
                 .document(userEmail);
 
@@ -226,5 +228,25 @@ public class ContactsFragment extends Fragment {
                 }
             }
         });
+    }
+
+    void setState(int state){
+        this.state = state;
+    }
+
+    void setEmptyId(int id){
+        this.emptyId = id;
+    }
+
+    void setListViewId(int id){
+        this.listViewId = id;
+    }
+
+    void setLayoutId(int id){
+        this.layoutId = id;
+    }
+
+    void setSearchId(int id){
+        this.searchId = id;
     }
 }

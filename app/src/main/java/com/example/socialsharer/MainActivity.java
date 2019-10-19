@@ -25,6 +25,7 @@ import com.example.socialsharer.Fragments.ContactsFragment;
 import com.example.socialsharer.Fragments.MapShareFragment;
 import com.example.socialsharer.Fragments.ProfileFragment;
 import com.example.socialsharer.Fragments.QRShareFragment;
+import com.example.socialsharer.Fragments.RequestFragment;
 import com.example.socialsharer.Fragments.SettingsFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -155,6 +156,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_settings) {
             fragment = new SettingsFragment();
             tag = "settings";
+        } else if (id == R.id.nav_requests){
+            fragment = new RequestFragment();
+            tag = "requests";
         }
         else {
             fragment = new ProfileFragment();
