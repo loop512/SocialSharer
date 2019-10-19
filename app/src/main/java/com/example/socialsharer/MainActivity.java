@@ -40,8 +40,6 @@ public class MainActivity extends AppCompatActivity
 
     public DrawerLayout drawer;
     private String userEmail;
-    private String introduction;
-    private String nickName;
     private long userNumber;
     private FirebaseFirestore db;
 
@@ -57,7 +55,6 @@ public class MainActivity extends AppCompatActivity
             userEmail = (String) bundle.get("email");
             userNumber = (long) bundle.get("userNumber");
         }
-//        getMyInfo();
 
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
 
@@ -125,9 +122,6 @@ public class MainActivity extends AppCompatActivity
         Bundle bundle = new Bundle();
         bundle.putString("email", userEmail);
         bundle.putLong("userNumber", userNumber);
-        if (nickName != null){
-            bundle.putString("nickName", nickName);
-        }
 
         if (id == R.id.nav_profile) {
             fragment = new ProfileFragment();
@@ -193,7 +187,6 @@ public class MainActivity extends AppCompatActivity
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
-
 }
 
 

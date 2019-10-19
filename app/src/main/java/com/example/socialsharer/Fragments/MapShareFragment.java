@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.socialsharer.CommonFunctions;
 import com.example.socialsharer.R;
 import com.example.socialsharer.data.User;
 import com.google.android.gms.maps.CameraUpdate;
@@ -64,16 +65,12 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private static final String ARG_PARAM2 = "param2";
     private static final String TAG = "MapShareFragment";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
     private MapView mMapView;
     private GoogleMap googleMap;
     private Double latitude;
     private Double longitude;
     private LocationManager locationManager;
     private FirebaseFirestore db;
-    private Location location;
     private Handler timeHandler;
     private Handler recommendHandler;
     private Runnable timeRunnable;
@@ -115,10 +112,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
         // Connect to fire base document database
         db = FirebaseFirestore.getInstance();
 
@@ -210,7 +204,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                             .setPositiveButton("Send",
                                     new DialogInterface.OnClickListener(){
                                 public void onClick(DialogInterface dialog, int which) {
-                                    sendRequest(email, title);
+                                    CommonFunctions.sendRequest(getActivity(), userEmail,
+                                            email, title, TAG);
+                                    //sendRequest(userEmail, email, title);
                                 }
                             })
                             // User click on no
@@ -225,66 +221,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     "Location permission not granted, can not use \"Map Share\" function",
                     Toast.LENGTH_LONG).show();
         }
-
-    }
-
-    public void sendRequest(final String email, final String nickname){
-        // document reference for friend requests
-        final DocumentReference documentRef = db.collection("request")
-                                        .document(userEmail);
-
-        documentRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                FieldPath field = FieldPath.of(email);
-                if(task.isSuccessful()){
-                    DocumentSnapshot document = task.getResult();
-                    if(document.exists()){
-                        Log.i(TAG, "target user email: " + email);
-                        if (document.get(field) == null){
-                            // haven't send request to such user
-                            documentRef.update(field, 1);
-                            Toast.makeText(getActivity(),
-                                    "Successfully sent friend request to "
-                                            + nickname + ".", Toast.LENGTH_SHORT).show();
-                            Log.i(TAG, "document exist, never sent request to this user");
-                        } else {
-                            // Already sent request to this user, check request state
-                            long requestState = (long) document.get(field );
-                            Log.i(TAG, "document exist, request state: " + requestState);
-                            if(requestState == 1){
-                                Toast.makeText(getActivity(), "Already to send request to "
-                                        + nickname + ", still wait for confirmation."
-                                        , Toast.LENGTH_SHORT).show();
-                            } else if (requestState == 3){
-                              // Already friend, usually requestState won't be 3 here, but in case
-                              // of that happened we have following code to handle that situation.
-                                Toast.makeText(getActivity(), "User " + nickname
-                                                + " is already your friend!"
-                                        , Toast.LENGTH_SHORT).show();
-                            } else{
-                                // Request want rejected, resent the request.
-                                documentRef.update(field, 1);
-                                Toast.makeText(getActivity(),
-                                        "Successfully sent friend request to "
-                                            + nickname + ".", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    } else {
-                        // Haven't sent request to anyone, create document and send request
-                        documentRef.update(field, 1);
-                        Toast.makeText(getActivity(), "Successfully sent friend request to "
-                                + nickname + ".", Toast.LENGTH_SHORT).show();
-                        Log.i(TAG, "document not exist, never sent request to any user");
-                    }
-                } else {
-                    // Fail to download document from file base
-                    Toast.makeText(getActivity(), "Fail to send request to " + nickname
-                            + ", check your internet connection.", Toast.LENGTH_SHORT).show();
-                    Log.i(TAG, "Get sent request task fail, check internet connection");
-                }
-            }
-        });
 
     }
 
@@ -410,7 +346,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             final String name = user.getNickName();
             final String introduction = user.getIntroduction();
             final LatLng userLocation = new LatLng(latitude, longitude);
-            final String occupation = user.getOccupation();
             try{
                 final File localFile = File.createTempFile("images", "jpg");
                 imageRef.getFile(localFile).addOnSuccessListener(
@@ -465,8 +400,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         userEmails.put(marker.getSnippet(), email);
     }
 
-
-
     public void recommendUser(){
         storageRef = FirebaseStorage.getInstance().getReference();
 
@@ -492,6 +425,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         };
     }
 
+    /**
+     * Random select user index for later sifting.
+     * Selected index will be added into arrayList selected index.
+     */
     public void randomSelect(){
         int maxIndex = new Long(userNumber).intValue();
         ArrayList selectedList = new ArrayList();
