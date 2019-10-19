@@ -497,11 +497,15 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         ArrayList selectedList = new ArrayList();
         Random generater = new Random();
         for (int currentNum = 0; currentNum < targetNumber; currentNum ++){
-            int nextInt = generater.nextInt(maxIndex);
-            while (selectedList.contains(nextInt)) {
-                nextInt = generater.nextInt(maxIndex);
+            if(recommendUserList.size() + selectedList.size() >= targetNumber){
+                break;
+            } else {
+                int nextInt = generater.nextInt(maxIndex);
+                while (selectedList.contains(nextInt)) {
+                    nextInt = generater.nextInt(maxIndex);
+                }
+                selectedList.add(nextInt);
             }
-            selectedList.add(nextInt);
         }
         selectedIndex = selectedList;
     }
