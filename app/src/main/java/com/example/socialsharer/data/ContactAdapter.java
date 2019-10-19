@@ -19,7 +19,7 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
 
     public ContactAdapter(Context context, ArrayList<Contact> contactList) {
         super(context, R.layout.contact, contactList);
-        contactList=contactList;
+        contactList = contactList;
         this.context = context;
     }
 
@@ -37,10 +37,10 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         if(convertView==null){
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.contact, parent, false);
-            holder=new ViewHolder();
+            holder = new ViewHolder();
 
-            holder.name=(TextView)convertView.findViewById(R.id.contact_name);
-            holder.image=(ImageView)convertView.findViewById(R.id.contact_image);
+            holder.name = convertView.findViewById(R.id.contact_name);
+            holder.image = convertView.findViewById(R.id.contact_image);
             convertView.setTag(holder);
         }
         else{
@@ -50,8 +50,11 @@ public class ContactAdapter extends ArrayAdapter<Contact> {
         Contact contact=getItem(position);
 
         holder.name.setText(contact.getName());
-        holder.image.setImageResource(contact.getImageID());
-
+        if(contact.getBitmap() == null){
+            holder.image.setImageResource(contact.getImageID());
+        } else {
+            holder.image.setImageBitmap(contact.getBitmap());
+        }
         return convertView;
     }
 }

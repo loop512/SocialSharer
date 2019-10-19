@@ -145,83 +145,91 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     @Override
     public void onMapReady(GoogleMap map) {
         googleMap = map;
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            permission = true;
-            Log.i(TAG, "Initiate, user permission is granted");
+        if(isAdded()){
+            // successful added can get context! required check, otherwise will cause crash
+            if (ContextCompat.checkSelfPermission
+                    (getContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                permission = true;
+                Log.i(TAG, "Initiate, user permission is granted");
 
-            // Attach basic functions and buttons to google map
-            googleMap.setMyLocationEnabled(true);
-            googleMap.setOnMyLocationButtonClickListener(this);
-            googleMap.setOnMyLocationClickListener(this);
+                // Attach basic functions and buttons to google map
+                googleMap.setMyLocationEnabled(true);
+                googleMap.setOnMyLocationButtonClickListener(this);
+                googleMap.setOnMyLocationClickListener(this);
 
-            // Initiate the location manager, update user's current location and setup the timer.
-            locationManager = (LocationManager) getActivity()
-                    .getSystemService(Context.LOCATION_SERVICE);
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    100,100,this);
+                // Initiate the location manager, update user's current location and setup the timer.
+                locationManager = (LocationManager) getActivity()
+                        .getSystemService(Context.LOCATION_SERVICE);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                        100,100,this);
 
-            // Set timer to upload user's location every 10 minutes
-            timeHandler = new Handler();
-            timeUpdate();
-            timeHandler.postDelayed(timeRunnable, 600000);
-            Log.i(TAG, "Initiate success");
+                // Set timer to upload user's location every 10 minutes
+                timeHandler = new Handler();
+                timeUpdate();
+                timeHandler.postDelayed(timeRunnable, 600000);
+                Log.i(TAG, "Initiate success");
 
-            // random select recommend users first
-            randomSelect();
+                // random select recommend users first
+                randomSelect();
 
-            // sift and plot the random selected users
-            for (int index: selectedIndex){
-                getDocument(index);
-                Log.i(TAG, "User: " + index);
-            }
-
-            // Set task recommend user until given number of users are recommended.
-            recommendHandler = new Handler();
-            recommendUser();
-            recommendHandler.postDelayed(recommendRunnable, 1000);
-
-            // Use customer information window adapter
-            CustomInfoWindowAdapter customInfoWindow = new CustomInfoWindowAdapter(getContext());
-            map.setInfoWindowAdapter(customInfoWindow);
-
-            map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                @Override
-                public void onInfoWindowClick(Marker marker) {
-                    final String title = marker.getTitle();
-                    final String email = userEmails.get(marker.getSnippet());
-                    Log.i(TAG, "marker contains email: " + email);
-                    Log.i(TAG, "Click on marker: " + title);
-
-                    // User click on information window,
-                    // ask again whether they want to send friend request
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("Send friend request to " + title)
-                            .setMessage("Are you sure you want to sent a friend request to "
-                                    + title + "?")
-
-                            // User click on yes, check and send request
-                            .setPositiveButton("Send",
-                                    new DialogInterface.OnClickListener(){
-                                public void onClick(DialogInterface dialog, int which) {
-                                    CommonFunctions.sendRequest(getActivity(), userEmail,
-                                            email, title, TAG);
-                                    //sendRequest(userEmail, email, title);
-                                }
-                            })
-                            // User click on no
-                            .setNegativeButton("Cancel", null)
-                            .show();
+                // sift and plot the random selected users
+                for (int index: selectedIndex){
+                    getDocument(index);
+                    Log.i(TAG, "User: " + index);
                 }
-            });
-        } else {
-            // Don't have access to internet
-            Log.w(TAG, "User permission not granted");
-            Toast.makeText(getActivity(),
-                    "Location permission not granted, can not use \"Map Share\" function",
-                    Toast.LENGTH_LONG).show();
-        }
 
+                // Set task recommend user until given number of users are recommended.
+                recommendHandler = new Handler();
+                recommendUser();
+                recommendHandler.postDelayed(recommendRunnable, 1000);
+
+                if(isAdded()){
+                    // Check again in case user turn of the map at this moment
+                    // Use customer information window adapter
+                    CustomInfoWindowAdapter customInfoWindow =
+                            new CustomInfoWindowAdapter(getContext());
+                    map.setInfoWindowAdapter(customInfoWindow);
+
+                    map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                        @Override
+                        public void onInfoWindowClick(Marker marker) {
+                            final String title = marker.getTitle();
+                            final String email = userEmails.get(marker.getSnippet());
+                            Log.i(TAG, "marker contains email: " + email);
+                            Log.i(TAG, "Click on marker: " + title);
+
+                            // User click on information window,
+                            // ask again whether they want to send friend request
+                            new AlertDialog.Builder(getContext())
+                                    .setTitle("Send friend request to " + title)
+                                    .setMessage("Are you sure you want to sent a friend request to "
+                                            + title + "?")
+
+                                    // User click on yes, check and send request
+                                    .setPositiveButton("Send",
+                                            new DialogInterface.OnClickListener(){
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    CommonFunctions
+                                                            .sendRequest(getActivity(), userEmail,
+                                                            email, title, TAG);
+                                                    //sendRequest(userEmail, email, title);
+                                                }
+                                            })
+                                    // User click on no
+                                    .setNegativeButton("Cancel", null)
+                                    .show();
+                        }
+                    });
+                }
+            } else {
+                // Don't have access to internet
+                Log.w(TAG, "User permission not granted");
+                Toast.makeText(getActivity(),
+                        "Location permission not granted, can not use \"Map Share\" function",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
@@ -289,6 +297,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         if (permission){
             updateLocation(userEmail);
         }
+
     }
 
     @Override
@@ -488,10 +497,13 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 }
                                 else {
                                     if(!containUser(nickName)){
-                                        Log.i(TAG, "add user: " + newRecommendUser.getNickName());
-                                        Log.i(TAG, "add user's email: " + newRecommendUser.getEmail());
+                                        Log.i(TAG, "add user: " +
+                                                newRecommendUser.getNickName());
+                                        Log.i(TAG, "add user's email: "
+                                                + newRecommendUser.getEmail());
                                         recommendUserList.add(newRecommendUser);
-                                        Log.i(TAG, "Current size: " + recommendUserList.size());
+                                        Log.i(TAG, "Current size: "
+                                                + recommendUserList.size());
                                     }
                                     if(recommendUserList.size() == targetNumber){
                                         break;

@@ -38,7 +38,16 @@
             android:divider="#828282"
             android:dividerHeight="0.5dp"
             android:footerDividersEnabled="false"
-            android:headerDividersEnabled="false" />
+            android:headerDividersEnabled="false" >
+        </ListView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/empty"
+            android:text="@string/empty_contacts"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:layout_marginTop="15dp"/>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -69,6 +69,9 @@
 
     //Contacts
     <string name="search_contacts">Search Contacts</string>
+    <string name="empty_contacts">Currently you don\'t have any contacts,
+        find some friends using our app!</string>
+
     //Setting
     <string name="logout_button">Sign Out</string>
     <!-- TODO: Remove or change this placeholder text -->

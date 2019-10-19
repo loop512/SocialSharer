@@ -1,18 +1,20 @@
 package com.example.socialsharer;
 
 import android.app.Activity;
+
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 
 public class CommonFunctions {
 
@@ -53,13 +55,14 @@ public class CommonFunctions {
                                 Toast.makeText(activity, "User " + nickname
                                                 + " is already your friend!"
                                         , Toast.LENGTH_SHORT).show();
-                            } else{
+                            } else if (requestState == 2){
                                 // Request want rejected, resent the request.
                                 documentRef.update(field, 1);
                                 Toast.makeText(activity,
                                         "Successfully sent friend request to "
                                                 + nickname + ".", Toast.LENGTH_SHORT).show();
                             }
+                            // received request, don't do anything
                         }
                     } else {
                         // Haven't sent request to anyone, create document and send request

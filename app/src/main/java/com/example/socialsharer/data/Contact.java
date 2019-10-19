@@ -1,14 +1,21 @@
 package com.example.socialsharer.data;
 
-import android.widget.ImageView;
+import android.graphics.Bitmap;
 
 public class Contact {
-    String name;
-    int imageId;
+    private String name;
+    private int imageId = 0;
+    private Bitmap bitmap;
 
     public Contact(String name, int imageId) {
-        this.name=name;
-        this.imageId=imageId;
+        this.name = name;
+        this.imageId = imageId;
+        this.bitmap = null;
+    }
+
+    public Contact(String name, Bitmap bitmap) {
+        this.name = name;
+        this.bitmap = bitmap;
     }
 
     public String getName() {
@@ -17,5 +24,9 @@ public class Contact {
 
     public int getImageID() {
         return imageId;
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
     }
 }
