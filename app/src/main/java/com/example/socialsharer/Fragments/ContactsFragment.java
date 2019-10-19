@@ -3,7 +3,6 @@ package com.example.socialsharer.Fragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,17 +11,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.socialsharer.CommonFunctions;
 import com.example.socialsharer.ContactProfileActivity;
-import com.example.socialsharer.EditProfileActivity;
 import com.example.socialsharer.R;
 import com.example.socialsharer.data.Contact;
 import com.example.socialsharer.data.ContactAdapter;
+import com.example.socialsharer.data.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -61,6 +60,7 @@ public class ContactsFragment extends Fragment {
     private StorageReference storageRef;
     private FirebaseFirestore db;
     private SearchView search;
+    private ArrayList<User> contactUserList = new ArrayList<>();
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -169,7 +169,12 @@ public class ContactsFragment extends Fragment {
                 if (task.isSuccessful()){
                     DocumentSnapshot document = task.getResult();
                     if(document.exists()){
-                        String username = document.getString("nickName");
+                        User user = CommonFunctions.createUser(document, path);
+                        contactUserList.add(user);
+                        Log.i(TAG, "Adding user: " + user.getEmail());
+                        Log.i(TAG, "Users nick name: " + user.getNickName());
+                        Log.i(TAG, "Current contact list size: " + contactUserList.size());
+                        String username = user.getNickName();
                         if(username != null) {
                             displayName = username;
                         }

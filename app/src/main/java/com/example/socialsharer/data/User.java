@@ -8,17 +8,20 @@ public class User {
     private Double latitude;
     private Double longitude;
     private String occupation;
-    private String imagePath = null;
-    public User() {}
+    private String imagePath;
+    private String contactNumber;
 
     public User(String email, String nickName, String introduction,
-                Double latitude, Double longitude, String occupation) {
+                Double latitude, Double longitude, String occupation,
+                String imagePath, String contactNumber) {
         this.email = email;
         this.nickName = nickName;
         this.introduction = introduction;
         this.latitude = latitude;
         this.longitude = longitude;
         this.occupation = occupation;
+        this.imagePath = imagePath;
+        this.contactNumber = contactNumber;
     }
 
     public void setImagePath(String path){
@@ -45,5 +48,15 @@ public class User {
         return longitude;
     }
 
-    public String getOccupation() {return occupation; }
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public String getContactNumber(){
+        return contactNumber;
+    }
 }

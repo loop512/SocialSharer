@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.example.socialsharer.data.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 
 import com.google.android.gms.tasks.Task;
@@ -14,6 +15,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 
 public class CommonFunctions {
@@ -79,5 +81,40 @@ public class CommonFunctions {
                 }
             }
         });
+    }
+
+    public static User createUser(DocumentSnapshot document, String path){
+        String nickName = null;
+        String introduction = null;
+        Double latitude = null;
+        Double longitude = null;
+        String email = null;
+        String occupation = null;
+        String imagePath = path;
+        String contactNumber = null;
+
+        if (document.get("nickName") != null){
+            nickName = (String) document.get("nickName");
+        }
+        if (document.get("latitude") != null){
+            latitude = (Double) document.get("latitude");
+        }
+        if (document.get("longitude") != null){
+            longitude = (Double) document.get("longitude");
+        }
+        if (document.get("Introduction") != null){
+            introduction = (String) document.get("Introduction");
+        }
+        if (document.get("Occupation") != null){
+            occupation = (String) document.get("Occupation");
+        }
+        if (document.get("Contact Number") != null){
+            contactNumber = (String) document.get("Contact Number");
+        }
+        email = document.getId();
+
+        User user = new User(email, nickName, introduction, latitude, longitude, occupation,
+                        imagePath, contactNumber);
+        return user;
     }
 }

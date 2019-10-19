@@ -18,6 +18,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.socialsharer.Fragments.ContactsFragment;
@@ -86,7 +87,7 @@ public class MainActivity extends AppCompatActivity
         Fragment fragment = new ProfileFragment();
         fragment.setArguments(bundle);
         setTitle(R.string.menu_profile);
-        loadFragment(fragment);
+        loadFragment(fragment, "profile");
         navigationView.setNavigationItemSelectedListener(this);
     }
 
@@ -137,34 +138,41 @@ public class MainActivity extends AppCompatActivity
         bundle.putString("email", userEmail);
         bundle.putLong("userNumber", userNumber);
 
+        String tag;
+
         if (id == R.id.nav_profile) {
             fragment = new ProfileFragment();
+            tag = "profile";
         } else if (id == R.id.nav_qrshare) {
             fragment = new QRShareFragment();
+            tag = "qrshare";
         } else if (id == R.id.nav_mapshare) {
             fragment = new MapShareFragment();
+            tag = "mapshare";
         } else if (id == R.id.nav_contacts) {
             fragment = new ContactsFragment();
+            tag = "contacts";
         } else if (id == R.id.nav_settings) {
             fragment = new SettingsFragment();
+            tag = "settings";
         }
         else {
             fragment = new ProfileFragment();
+            tag = "profile";
         }
         fragment.setArguments(bundle);
         previousItemId = item.getItemId();
         drawer.closeDrawer(GravityCompat.START);
-
-        loadFragment(fragment);
+        loadFragment(fragment, tag);
 
         item.setChecked(true);
         setTitle(item.getTitle());
         return true;
     }
 
-    private void loadFragment(Fragment fragment) {
+    private void loadFragment(Fragment fragment, String tag) {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.frame, fragment);
+        fragmentTransaction.replace(R.id.frame, fragment, tag);
         fragmentTransaction.commit();
     }
 

@@ -363,7 +363,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                                 Log.i(TAG, "User image Downloaded");
                                 String path = localFile.getAbsolutePath();
-
                                 Bitmap bitmap = BitmapFactory.decodeFile(path);
                                 addMarker(bitmap, opacity, userLocation,
                                         name, introduction, path, email);
@@ -466,32 +465,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                String nickName = null;
-                                String introduction = null;
-                                Double latitude = null;
-                                Double longitude = null;
-                                String email = null;
-                                String occupation = null;
-                                if (document.get("nickName") != null){
-                                    nickName = (String) document.get("nickName");
-                                }
-                                if (document.get("latitude") != null){
-                                    latitude = (Double) document.get("latitude");
-                                }
-                                if (document.get("longitude") != null){
-                                    longitude = (Double) document.get("longitude");
-                                }
-                                if (document.get("Introduction") != null){
-                                    introduction = (String) document.get("Introduction");
-                                }
-                                if (document.get("Occupation") != null){
-                                    occupation = (String) document.get("Occupation");
-                                }
-                                email = document.getId();
-                                User newRecommendUser =
-                                        new User(email, nickName, introduction,
-                                                latitude, longitude, occupation);
-                                if (email.equals(userEmail)||
+                                User newRecommendUser = CommonFunctions.createUser(document,
+                                        null);
+                                if (newRecommendUser.getEmail().equals(userEmail)||
                                         latitude == null || longitude == null){
                                     targetNumber = targetNumber - 1;
                                 }
