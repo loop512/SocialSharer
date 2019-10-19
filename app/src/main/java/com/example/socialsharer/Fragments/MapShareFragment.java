@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -41,6 +40,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -48,7 +48,6 @@ import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.HashMap;
@@ -68,7 +67,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    MapView mMapView;
+    private MapView mMapView;
     private GoogleMap googleMap;
     private Double latitude;
     private Double longitude;
@@ -80,11 +79,11 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private Runnable timeRunnable;
     private Runnable recommendRunnable;
     private Boolean permission = false;
-    private ArrayList<User> recomendUserList = new ArrayList();
+    private ArrayList<User> recommendUserList = new ArrayList();
     private String userEmail;
     private long userNumber;
     private ArrayList<Integer> selectedIndex = new ArrayList();
-    private int targeNumber = 3;
+    private int targetNumber = 3;
     private String nickName;
         private CircleImage imageHandler = new CircleImage();
     private boolean firstTime = true;
@@ -120,8 +119,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        // Connect to fire base document database
         db = FirebaseFirestore.getInstance();
 
+        // Get required information from previous activity
         Bundle bundle = getArguments();
         userEmail = bundle.getString("email");
         userNumber = bundle.getLong("userNumber");
@@ -138,7 +139,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_map_share, container,
                 false);
-        mMapView = (MapView) v.findViewById(R.id.mapView);
+        mMapView = v.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
         mMapView.onResume();// needed to get the map to display immediately
@@ -166,58 +167,124 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     100,100,this);
 
+            // Set timer to upload user's location every 10 minutes
             timeHandler = new Handler();
             timeUpdate();
-            timeHandler.postDelayed(timeRunnable, 300000);
-
+            timeHandler.postDelayed(timeRunnable, 600000);
             Log.i(TAG, "Initiate success");
 
+            // random select recommend users first
             randomSelect();
+
+            // sift and plot the random selected users
             for (int index: selectedIndex){
                 getDocument(index);
                 Log.i(TAG, "User: " + index);
             }
 
+            // Set task recommend user until given number of users are recommended.
             recommendHandler = new Handler();
             recommendUser();
             recommendHandler.postDelayed(recommendRunnable, 1000);
 
+            // Use customer information window adapter
             CustomInfoWindowAdapter customInfoWindow = new CustomInfoWindowAdapter(getContext());
             map.setInfoWindowAdapter(customInfoWindow);
 
             map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
                 public void onInfoWindowClick(Marker marker) {
-                    String title = marker.getTitle();
-                    String email = userEmails.get(marker.getSnippet());
+                    final String title = marker.getTitle();
+                    final String email = userEmails.get(marker.getSnippet());
                     Log.i(TAG, "marker contains email: " + email);
                     Log.i(TAG, "Click on marker: " + title);
 
+                    // User click on information window,
+                    // ask again whether they want to send friend request
                     new AlertDialog.Builder(getContext())
                             .setTitle("Send friend request to " + title)
-                            .setMessage("Are you sure you want to sent the request?")
+                            .setMessage("Are you sure you want to sent a friend request to "
+                                    + title + "?")
 
-                            // User click on yes
+                            // User click on yes, check and send request
                             .setPositiveButton("Send",
                                     new DialogInterface.OnClickListener(){
                                 public void onClick(DialogInterface dialog, int which) {
-                                    // Continue with delete operation
+                                    sendRequest(email, title);
                                 }
                             })
-
                             // User click on no
                             .setNegativeButton("Cancel", null)
                             .show();
-                    //TODO Write a view for the dialog!!!
                 }
             });
-
         } else {
+            // Don't have access to internet
             Log.w(TAG, "User permission not granted");
             Toast.makeText(getActivity(),
                     "Location permission not granted, can not use \"Map Share\" function",
                     Toast.LENGTH_LONG).show();
         }
+
+    }
+
+    public void sendRequest(final String email, final String nickname){
+        // document reference for friend requests
+        final DocumentReference documentRef = db.collection("request")
+                                        .document(userEmail);
+
+        documentRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                FieldPath field = FieldPath.of(email);
+                if(task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    if(document.exists()){
+                        Log.i(TAG, "target user email: " + email);
+                        if (document.get(field) == null){
+                            // haven't send request to such user
+                            documentRef.update(field, 1);
+                            Toast.makeText(getActivity(),
+                                    "Successfully sent friend request to "
+                                            + nickname + ".", Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "document exist, never sent request to this user");
+                        } else {
+                            // Already sent request to this user, check request state
+                            long requestState = (long) document.get(field );
+                            Log.i(TAG, "document exist, request state: " + requestState);
+                            if(requestState == 1){
+                                Toast.makeText(getActivity(), "Already to send request to "
+                                        + nickname + ", still wait for confirmation."
+                                        , Toast.LENGTH_SHORT).show();
+                            } else if (requestState == 3){
+                              // Already friend, usually requestState won't be 3 here, but in case
+                              // of that happened we have following code to handle that situation.
+                                Toast.makeText(getActivity(), "User " + nickname
+                                                + " is already your friend!"
+                                        , Toast.LENGTH_SHORT).show();
+                            } else{
+                                // Request want rejected, resent the request.
+                                documentRef.update(field, 1);
+                                Toast.makeText(getActivity(),
+                                        "Successfully sent friend request to "
+                                            + nickname + ".", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    } else {
+                        // Haven't sent request to anyone, create document and send request
+                        documentRef.update(field, 1);
+                        Toast.makeText(getActivity(), "Successfully sent friend request to "
+                                + nickname + ".", Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "document not exist, never sent request to any user");
+                    }
+                } else {
+                    // Fail to download document from file base
+                    Toast.makeText(getActivity(), "Fail to send request to " + nickname
+                            + ", check your internet connection.", Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "Get sent request task fail, check internet connection");
+                }
+            }
+        });
 
     }
 
@@ -333,7 +400,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
     public void downloadImages(){
         storageRef = FirebaseStorage.getInstance().getReference();
-        for(User user: recomendUserList) {
+        for(User user: recommendUserList) {
             String path = user.getEmail() + "/Photo";
             StorageReference imageRef = storageRef.child(path);
             final String email = user.getEmail();
@@ -407,8 +474,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         recommendRunnable = new Runnable() {
             @Override
             public void run() {
-                Log.i(TAG, "Recommend list size " + recomendUserList.size());
-                if(recomendUserList.size() >= targeNumber){
+                Log.i(TAG, "Recommend list size " + recommendUserList.size());
+                if(recommendUserList.size() >= targetNumber){
                     downloadImages();
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
@@ -429,7 +496,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         int maxIndex = new Long(userNumber).intValue();
         ArrayList selectedList = new ArrayList();
         Random generater = new Random();
-        for (int currentNum = 0; currentNum < targeNumber; currentNum ++){
+        for (int currentNum = 0; currentNum < targetNumber; currentNum ++){
             int nextInt = generater.nextInt(maxIndex);
             while (selectedList.contains(nextInt)) {
                 nextInt = generater.nextInt(maxIndex);
@@ -476,16 +543,16 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                                 latitude, longitude, occupation);
                                 if (email.equals(userEmail)||
                                         latitude == null || longitude == null){
-                                    targeNumber = targeNumber - 1;
+                                    targetNumber = targetNumber - 1;
                                 }
                                 else {
                                     if(!containUser(nickName)){
                                         Log.i(TAG, "add user: " + newRecommendUser.getNickName());
                                         Log.i(TAG, "add user's email: " + newRecommendUser.getEmail());
-                                        recomendUserList.add(newRecommendUser);
-                                        Log.i(TAG, "Current size: " + recomendUserList.size());
+                                        recommendUserList.add(newRecommendUser);
+                                        Log.i(TAG, "Current size: " + recommendUserList.size());
                                     }
-                                    if(recomendUserList.size() == targeNumber){
+                                    if(recommendUserList.size() == targetNumber){
                                         break;
                                     }
                                 }
@@ -498,7 +565,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     }
 
     private boolean containUser(String nickName){
-        for(User user: recomendUserList){
+        for(User user: recommendUserList){
             if (user.getNickName().equals((nickName))){
                 return true;
             }
