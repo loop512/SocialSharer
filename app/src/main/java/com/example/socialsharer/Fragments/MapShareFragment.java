@@ -297,7 +297,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         if (permission){
             updateLocation(userEmail);
         }
-
+        recommendHandler.removeCallbacks(recommendRunnable);
     }
 
     @Override
@@ -370,11 +370,13 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
-                        Bitmap bitmap = BitmapFactory.decodeResource(
-                                getResources(), R.drawable.unknown);
-                        addMarker(bitmap, opacity, userLocation,
-                                name, introduction, null, email);
-                        Log.i(TAG, "Fail to download user image, using default");
+                        if(isAdded()) {
+                            Bitmap bitmap = BitmapFactory.decodeResource(
+                                    getResources(), R.drawable.unknown);
+                            addMarker(bitmap, opacity, userLocation,
+                                    name, introduction, null, email);
+                            Log.i(TAG, "Fail to download user image, using default");
+                        }
                     }
                 });
             } catch (Exception e){

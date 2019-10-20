@@ -54,7 +54,6 @@ public class ContactsFragment extends Fragment {
     private String userEmail;
     private long userNumber;
     private ArrayList<Contact> contactList;
-    private ArrayList<String> receivedRequest;
     private ListView listView;
     private ContactAdapter contactAdapter;
     private ArrayList<String> contacts;
@@ -66,6 +65,8 @@ public class ContactsFragment extends Fragment {
     private int listViewId = R.id.contact_list;
     private int layoutId = R.layout.fragment_contacts;
     private int searchId = R.id.search_contacts;
+    private String fragmentState = "contact_fragment";
+    private boolean firstOpen = true;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -93,8 +94,6 @@ public class ContactsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            contacts = bundle.getStringArrayList("contacts");
-            receivedRequest = bundle.getStringArrayList("receives");
             userEmail = bundle.getString("email");
             userNumber = bundle.getLong("userNumber");
         }
@@ -126,10 +125,14 @@ public class ContactsFragment extends Fragment {
                     public void onItemClick(AdapterView<?> arg0, View view,
                                                 int position, long id) {
                         Intent intent = new Intent(getActivity(), ContactProfileActivity.class);
+                        intent.putExtra("state", fragmentState);
+                        Log.i(TAG, userEmail);
+                        User clickedUser  = contactUserList.get(position);
+                        intent.putExtra("contact", clickedUser);
+                        intent.putExtra("userEmail", userEmail);
                         startActivity(intent);
                     }
                 });
-
         return view;
     }
 
@@ -163,7 +166,6 @@ public class ContactsFragment extends Fragment {
     private void addUserToList(final String email, final String path){
         final DocumentReference docRef = db.collection("users")
                 .document(email);
-
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -208,7 +210,7 @@ public class ContactsFragment extends Fragment {
                 if(task.isSuccessful()){
                     DocumentSnapshot document = task.getResult();
                     if(document.exists()){
-                        Map<String, Object> requests = new HashMap<>();
+                        Map<String, Object> requests;
                         requests = document.getData();
                         if (requests.size() != 0) {
                             // Current user has potential contacts
@@ -230,6 +232,24 @@ public class ContactsFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(firstOpen){
+            firstOpen = false;
+        } else {
+            contactList.clear();
+            contactUserList.clear();
+            contactAdapter.notifyDataSetChanged();
+            getList(state);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
     void setState(int state){
         this.state = state;
     }
@@ -248,5 +268,9 @@ public class ContactsFragment extends Fragment {
 
     void setSearchId(int id){
         this.searchId = id;
+    }
+
+    void setFragmentState(String state){
+        this.fragmentState = state;
     }
 }

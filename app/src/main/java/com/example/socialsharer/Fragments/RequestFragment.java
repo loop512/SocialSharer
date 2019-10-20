@@ -1,6 +1,7 @@
 package com.example.socialsharer.Fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,8 @@ import com.example.socialsharer.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 
+import io.opencensus.metrics.LongGauge;
+
 /**
  *
  */
@@ -19,6 +22,7 @@ public class RequestFragment extends ContactsFragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "RequestFragment";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -54,6 +58,7 @@ public class RequestFragment extends ContactsFragment {
         setEmptyId(R.id.requests_empty);
         setListViewId(R.id.requests_list);
         setSearchId(R.id.search_requests);
+        setFragmentState("request_fragment");
     }
 
     @Override

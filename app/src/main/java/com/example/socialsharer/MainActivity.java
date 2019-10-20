@@ -199,6 +199,9 @@ public class MainActivity extends AppCompatActivity
     private void loadFragment(Fragment fragment, String tag) {
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.frame, fragment, tag);
+        if(!tag.equals("mapshare")) {
+            fragmentTransaction.addToBackStack(tag);
+        }
         fragmentTransaction.commit();
     }
 
@@ -242,6 +245,7 @@ public class MainActivity extends AppCompatActivity
             public void onSuccess(Uri uri) {
                 Log.d("URI", uri.toString());
                 Glide.with(MainActivity.this).load(uri).into(profileImage);
+                Log.i(TAG, "Main start");
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

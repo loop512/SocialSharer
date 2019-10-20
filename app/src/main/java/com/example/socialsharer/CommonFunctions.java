@@ -2,7 +2,10 @@ package com.example.socialsharer;
 
 import android.app.Activity;
 
+import android.content.Context;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -16,6 +19,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class CommonFunctions {
@@ -32,16 +39,26 @@ public class CommonFunctions {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 FieldPath field = FieldPath.of(email);
+                String feedbackSuccess = "Successfully sent friend request to "
+                        + nickname + ".";
+                String feedbackInternet = "Fail to send request to " + nickname
+                        + ", check your internet connection.";
+
+                Map<String, Object> request = new HashMap<>();
+                request.put(email, 1);
+                Map<String, Object> receive = new HashMap<>();
+                receive.put(current_email, 4);
+
                 if(task.isSuccessful()){
                     DocumentSnapshot document = task.getResult();
                     if(document.exists()){
                         Log.i(TAG, "target user email: " + email);
                         if (document.get(field) == null){
                             // haven't send request to such user
-                            documentRef.update(field, 1);
-                            Toast.makeText(activity,
-                                    "Successfully sent friend request to "
-                                            + nickname + ".", Toast.LENGTH_SHORT).show();
+                            documentRef.set(request, SetOptions.merge());
+                            setRequestState(activity, email, receive,
+                                    feedbackSuccess, feedbackInternet,
+                                    true, TAG, null, null);
                             Log.i(TAG, "document exist, never sent request to this user");
                         } else {
                             // Already sent request to this user, check request state
@@ -59,18 +76,19 @@ public class CommonFunctions {
                                         , Toast.LENGTH_SHORT).show();
                             } else if (requestState == 2){
                                 // Request want rejected, resent the request.
-                                documentRef.update(field, 1);
-                                Toast.makeText(activity,
-                                        "Successfully sent friend request to "
-                                                + nickname + ".", Toast.LENGTH_SHORT).show();
+                                documentRef.set(request, SetOptions.merge());
+                                setRequestState(activity, email, receive,
+                                        feedbackSuccess, feedbackInternet, true, TAG,
+                                        null, null);
                             }
-                            // received request, don't do anything
+                            // TODO received request, directly add friend
                         }
                     } else {
                         // Haven't sent request to anyone, create document and send request
-                        documentRef.update(field, 1);
-                        Toast.makeText(activity, "Successfully sent friend request to "
-                                + nickname + ".", Toast.LENGTH_SHORT).show();
+                        documentRef.set(request, SetOptions.merge());
+                        setRequestState(activity, email, receive,
+                                feedbackSuccess, feedbackInternet, true, TAG,
+                                null, null);
                         Log.i(TAG, "document not exist, never sent request to any user");
                     }
                 } else {
@@ -83,38 +101,86 @@ public class CommonFunctions {
         });
     }
 
+    public static void setRequestState(final Context activity, final String email,
+                                       final Map update, final String feedbackSuccess,
+                                       final String feedbackInternet, final boolean toast,
+                                       final String TAG, final Button btn, final String btnChange){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final DocumentReference documentRef = db.collection("request")
+                .document(email);
+        documentRef.set(update, SetOptions.merge()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()){
+                    // successful update
+                    if (toast){
+                        if(btn != null){
+                            btn.setClickable(false);
+                            btn.setText(btnChange);
+                        }
+                        Toast.makeText(activity, feedbackSuccess, Toast.LENGTH_SHORT).show();
+                    }
+                    Log.i(TAG, "Update request successful");
+                } else {
+                    // fail connect to fire base
+                    if (toast){
+                        Toast.makeText(activity, feedbackInternet, Toast.LENGTH_SHORT).show();
+                    }
+                    Log.i(TAG, "Fail to update request," +
+                            " check permission or internet connection");
+                }
+            }
+        });
+    }
+
     public static User createUser(DocumentSnapshot document, String path){
-        String nickName = null;
-        String introduction = null;
+        String nickName, introduction, email, occupation, imagePath = path,
+                contactNumber, facebook, twitter,
+                instagram = null, wechat = null, linkedin = null;
+
         Double latitude = null;
         Double longitude = null;
-        String email = null;
-        String occupation = null;
-        String imagePath = path;
-        String contactNumber = null;
 
-        if (document.get("nickName") != null){
-            nickName = (String) document.get("nickName");
-        }
+        // load last known location
         if (document.get("latitude") != null){
             latitude = (Double) document.get("latitude");
         }
         if (document.get("longitude") != null){
             longitude = (Double) document.get("longitude");
         }
-        if (document.get("Introduction") != null){
-            introduction = (String) document.get("Introduction");
-        }
-        if (document.get("Occupation") != null){
-            occupation = (String) document.get("Occupation");
-        }
-        if (document.get("Contact Number") != null){
-            contactNumber = (String) document.get("Contact Number");
-        }
+
+        nickName = convertString(document.get("nickName"));
+        introduction = convertString(document.get("Introduction"));
+        occupation = convertString(document.get("Occupation"));
+        contactNumber = convertString(document.get("Contact Number"));
         email = document.getId();
+        facebook = convertString(document.get("Facebook"));
+        twitter = convertString(document.get("Twitter"));
+        instagram = convertString(document.get("Instagram"));
+        wechat = convertString(document.get("Wechat"));
+        linkedin = convertString(document.get("Linkedin"));
 
         User user = new User(email, nickName, introduction, latitude, longitude, occupation,
-                        imagePath, contactNumber);
+                        imagePath, contactNumber, facebook, twitter, instagram, wechat, linkedin);
         return user;
+    }
+
+    private static String convertString(Object object){
+        if (object == null){
+            return null;
+        } else {
+            return (String) object;
+        }
+    }
+
+    public static void setClipboard(Context context, String text) {
+        android.content.ClipboardManager clipboard
+                = (android.content.ClipboardManager)
+                context.getSystemService(Context.CLIPBOARD_SERVICE);
+        android.content.ClipData clip =
+                android.content.ClipData.newPlainText("Copied", text);
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(context, "Information successfully " +
+                "copied  to clipboard", Toast.LENGTH_SHORT).show();
     }
 }
