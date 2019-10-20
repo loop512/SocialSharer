@@ -68,6 +68,10 @@
     <string name="enter_wechat_link">Enter your Wechat ID</string>
     <string name="save_socials">Save Details</string>
 
+    //QR Share
+    <string name="generate_qr">Generate QR Code</string>
+    <string name="export_qr">Export QR Code</string>
+    <string name="scan_qr">Scan QR Code</string>
     //Contacts
     <string name="search_contacts">Search Contacts</string>
     <string name="empty_contacts">Currently you don\'t have any contacts,
