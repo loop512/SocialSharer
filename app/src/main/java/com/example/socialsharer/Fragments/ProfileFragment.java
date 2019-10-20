@@ -59,6 +59,11 @@ public class ProfileFragment extends Fragment {
     private static final String CONTACT_NUMBER = "Contact Number";
     private static final String OCCUPATION = "Occupation";
     private static final String PHOTO = "Photo";
+    private static final String FACEBOOK = "Facebook";
+    private static final String TWITTER = "Twitter";
+    private static final String INSTAGRAM = "Instagram";
+    private static final String WECHAT = "Wechat";
+    private static final String LINKEDIN = "LinkedIn";
     private static final int PHOTO_SELECTION_REQUEST = 1;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -69,7 +74,8 @@ public class ProfileFragment extends Fragment {
     private StorageReference storageRef = FirebaseStorage.getInstance().getReference(email);
     private ListenerRegistration profileListener;
 
-    private TextView profileName, profileJob, profileAddress, profileNumber,profileEmail;
+    private TextView profileName, profileJob, profileAddress, profileNumber,profileEmail,
+                     profileFacebook, profileTwitter, profileIns, profileWechat, profileLinkedin;
     private ImageView editDetail;
     private ImageView editPhoto;
     private ImageView editSocials;
@@ -125,6 +131,11 @@ public class ProfileFragment extends Fragment {
         profileJob =  view.findViewById(R.id.profile_profession);
         profileName = view.findViewById(R.id.profile_name);
         profileNumber = view.findViewById(R.id.profile_number);
+        profileFacebook = view.findViewById(R.id.profile_facebook_link);
+        profileTwitter = view.findViewById(R.id.profile_twitter_link);
+        profileIns = view.findViewById(R.id.profile_instagram_link);
+        profileWechat = view.findViewById(R.id.profile_wechat_link);
+        profileLinkedin = view.findViewById(R.id.profile_linkedin_link);
         editDetail = view.findViewById(R.id.edit_details);
         editPhoto = view.findViewById(R.id.edit_image);
         editSocials = view.findViewById(R.id.edit_socials);
@@ -215,12 +226,22 @@ public class ProfileFragment extends Fragment {
                     String address = documentSnapshot.getString(HOME_ADDRESS);
                     String job = documentSnapshot.getString(OCCUPATION);
                     String number = documentSnapshot.getString(CONTACT_NUMBER);
+                    String facebook = documentSnapshot.getString(FACEBOOK);
+                    String twitter = documentSnapshot.getString(TWITTER);
+                    String ins = documentSnapshot.getString(INSTAGRAM);
+                    String wechat = documentSnapshot.getString(WECHAT);
+                    String linkedin = documentSnapshot.getString(LINKEDIN);
 
                     profileAddress.setText(address);
                     profileEmail.setText(email);
                     profileJob.setText(job);
                     profileName.setText(fullName);
                     profileNumber.setText(number);
+                    profileFacebook.setText(facebook);
+                    profileTwitter.setText(twitter);
+                    profileIns.setText(ins);
+                    profileWechat.setText(wechat);
+                    profileLinkedin.setText(linkedin);
                 }
             }
         });
