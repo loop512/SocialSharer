@@ -1,22 +1,31 @@
 package com.example.socialsharer.Fragments;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.socialsharer.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link QRShareFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link QRShareFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.io.ByteArrayOutputStream;
+
 public class QRShareFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -26,6 +35,15 @@ public class QRShareFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    private ImageView qrimage;
+    private FirebaseAuth auth = FirebaseAuth.getInstance();
+    private String email = auth.getCurrentUser().getEmail().toString();
+    private StorageReference sRef = FirebaseStorage.getInstance().getReference(email);
+    private static final String QR_CODE = "QRCODE";
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public QRShareFragment() {
         // Required empty public constructor
@@ -61,7 +79,39 @@ public class QRShareFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_qrshare, container, false);
+        View view = inflater.inflate (R.layout.fragment_qrshare, container, false);
+
+        qrimage = view.findViewById(R.id.qrCode);
+        try {
+            if(email != null){
+                MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+                BitMatrix bitMatrix = multiFormatWriter.encode(email, BarcodeFormat.QR_CODE,500,500);
+                BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+                Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+                qrimage.setImageBitmap(bitmap);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+                StorageReference qrStorage = sRef.child(QR_CODE);
+                UploadTask uploadTask = qrStorage.putBytes(data);
+                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(getActivity(), "QR Code uploaded failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        } catch (WriterException e){
+            e.printStackTrace();
+        }
+
+        return view;
+
     }
 }
