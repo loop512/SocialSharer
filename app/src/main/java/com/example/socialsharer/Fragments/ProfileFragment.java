@@ -61,6 +61,12 @@ public class ProfileFragment extends Fragment {
     private static final String PHOTO = "Photo";
     private static final int PHOTO_SELECTION_REQUEST = 1;
 
+    private static final String FACEBOOK = "Facebook";
+    private static final String TWITTER = "Twitter";
+    private static final String INSTAGRAM = "Instagram";
+    private static final String WECHAT = "Wechat";
+    private static final String LINKEDIN = "Linkedin";
+
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private String email = auth.getCurrentUser().getEmail().toString();
@@ -70,6 +76,7 @@ public class ProfileFragment extends Fragment {
     private ListenerRegistration profileListener;
 
     private TextView profileName, profileJob, profileAddress, profileNumber,profileEmail;
+    private TextView socialFacebook, socialTwitter, socialInstagram, socialWechat, socialLinkedin;
     private ImageView editDetail;
     private ImageView editPhoto;
     private ImageView editSocials;
@@ -130,6 +137,12 @@ public class ProfileFragment extends Fragment {
         editSocials = view.findViewById(R.id.edit_socials);
         profileImage = view.findViewById(R.id.profile_image);
 //        profileImage.setImageResource(R.drawable.unknown);
+
+        socialFacebook = view.findViewById(R.id.profile_facebook_link);
+        socialTwitter = view.findViewById(R.id.profile_twitter_link);
+        socialInstagram = view.findViewById(R.id.profile_instagram_link);
+        socialWechat = view.findViewById(R.id.profile_wechat_link);
+        socialLinkedin = view.findViewById(R.id.profile_linkedin_link);
 
         editDetail.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,11 +229,28 @@ public class ProfileFragment extends Fragment {
                     String job = documentSnapshot.getString(OCCUPATION);
                     String number = documentSnapshot.getString(CONTACT_NUMBER);
 
+                    String facebook = "", twitter = "", instagram = "", wechat = "", linkedin = "";
+                    if(documentSnapshot.contains(FACEBOOK))
+                        facebook = documentSnapshot.getString(FACEBOOK);
+                    if(documentSnapshot.contains(TWITTER))
+                        twitter = documentSnapshot.getString(TWITTER);
+                    if(documentSnapshot.contains(INSTAGRAM))
+                        instagram = documentSnapshot.getString(INSTAGRAM);
+                    if(documentSnapshot.contains(WECHAT))
+                        wechat = documentSnapshot.getString(WECHAT);
+                    if(documentSnapshot.contains(LINKEDIN))
+                        linkedin = documentSnapshot.getString(LINKEDIN);
+
                     profileAddress.setText(address);
                     profileEmail.setText(email);
                     profileJob.setText(job);
                     profileName.setText(fullName);
                     profileNumber.setText(number);
+                    socialFacebook.setText(facebook);
+                    socialTwitter.setText(twitter);
+                    socialInstagram.setText(instagram);
+                    socialWechat.setText(wechat);
+                    socialLinkedin.setText(linkedin);
                 }
             }
         });

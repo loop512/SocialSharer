@@ -4,10 +4,12 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,6 +23,8 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.bumptech.glide.Glide;
+import com.example.socialsharer.Fragments.CircleImage;
 import com.example.socialsharer.Fragments.ContactsFragment;
 import com.example.socialsharer.Fragments.MapShareFragment;
 import com.example.socialsharer.Fragments.ProfileFragment;
@@ -32,6 +36,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -46,23 +51,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
     public static int previousItemId = 0;
     public static int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
     private static final String TAG = "MainActivity";
+    private static final String PHOTO = "Photo";
 
     public DrawerLayout drawer;
     private String userEmail;
     private long userNumber;
     private FirebaseFirestore db;
+    private CircleImageView profileImage;
+    private TextView profileName;
+    private TextView profileEmail;
+
+    private FirebaseAuth mAuth;
+    private StorageReference storageRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestPermissions();
         db = FirebaseFirestore.getInstance();
+
+        mAuth = FirebaseAuth.getInstance();
+        storageRef = FirebaseStorage.getInstance().getReference(mAuth.getCurrentUser().getEmail());
 
         Intent previous = getIntent();
         Bundle bundle = previous.getExtras();
@@ -90,6 +107,11 @@ public class MainActivity extends AppCompatActivity
         setTitle(R.string.menu_profile);
         loadFragment(fragment, "profile");
         navigationView.setNavigationItemSelectedListener(this);
+
+        profileImage = navigationView.getHeaderView(0).findViewById(R.id.drawer_profile_image);
+        profileName = navigationView.getHeaderView(0).findViewById(R.id.drawer_profile_name);
+        profileEmail = navigationView.getHeaderView(0).findViewById(R.id.drawer_profile_email);
+        getBasicProfile();
     }
 
     @Override
@@ -212,6 +234,24 @@ public class MainActivity extends AppCompatActivity
                     permissions,
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
+    }
+
+    private void getBasicProfile(){
+        storageRef.child(PHOTO).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Log.d("URI", uri.toString());
+                Glide.with(MainActivity.this).load(uri).into(profileImage);
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("Load Image Exception", e.toString());
+                profileImage.setImageResource(R.drawable.unknown);
+            }
+        });
+        profileName.setText(mAuth.getCurrentUser().getDisplayName());
+        profileEmail.setText(mAuth.getCurrentUser().getEmail());
     }
 }
 

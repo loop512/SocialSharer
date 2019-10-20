@@ -45,7 +45,7 @@
     //Change Password
     <string name="title_activity_forgot_password">Confirm Email</string>
     <string name="title_activity_change_password">Change Password</string>
-    <string name="next">Next</string>
+    <string name="confirm">Confirm</string>
 
     //Profile
     <string name="profile_details">Profile Details</string>

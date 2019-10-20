@@ -16,6 +16,7 @@ import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -63,11 +64,11 @@ public class EditProfileActivity extends AppCompatActivity {
         skipBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent startNext = new Intent(EditProfileActivity.this,
-                        MainActivity.class);
-                startNext.putExtra("userNumber", userNumber);
-                startNext.putExtra("email", email);
-                startActivity(startNext);
+//                Intent startNext = new Intent(EditProfileActivity.this,
+//                        MainActivity.class);
+//                startNext.putExtra("userNumber", userNumber);
+//                startNext.putExtra("email", email);
+//                startActivity(startNext);
                 finish();
             }
         });
