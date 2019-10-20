@@ -112,22 +112,22 @@ public class EditSocialsActivity extends AppCompatActivity {
         socialsListener = profileRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                if(e != null){
+                if (e != null) {
                     Log.d(TAG, e.toString());
                     return;
                 }
 
-                if(documentSnapshot.exists()){
+                if (documentSnapshot.exists()) {
                     String facebook = "", twitter = "", instagram = "", wechat = "", linkedin = "";
-                    if(documentSnapshot.contains(FACEBOOK))
+                    if (documentSnapshot.contains(FACEBOOK))
                         facebook = documentSnapshot.getString(FACEBOOK);
-                    if(documentSnapshot.contains(TWITTER))
+                    if (documentSnapshot.contains(TWITTER))
                         twitter = documentSnapshot.getString(TWITTER);
-                    if(documentSnapshot.contains(INSTAGRAM))
+                    if (documentSnapshot.contains(INSTAGRAM))
                         instagram = documentSnapshot.getString(INSTAGRAM);
-                    if(documentSnapshot.contains(WECHAT))
+                    if (documentSnapshot.contains(WECHAT))
                         wechat = documentSnapshot.getString(WECHAT);
-                    if(documentSnapshot.contains(LINKEDIN))
+                    if (documentSnapshot.contains(LINKEDIN))
                         linkedin = documentSnapshot.getString(LINKEDIN);
 
                     facebookField.setText(facebook);
