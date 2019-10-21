@@ -1,6 +1,8 @@
 package com.example.socialsharer.Fragments;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,9 +17,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.example.socialsharer.CommonFunctions;
 import com.example.socialsharer.EditProfileActivity;
 import com.example.socialsharer.EditSocialsActivity;
 import com.example.socialsharer.R;
+import com.example.socialsharer.data.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -36,7 +40,6 @@ import com.squareup.picasso.Picasso;
 import javax.annotation.Nullable;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.grpc.Context;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -81,6 +84,7 @@ public class ProfileFragment extends Fragment {
     private ImageView editPhoto;
     private ImageView editSocials;
     private CircleImageView profileImage;
+    private User myself;
     private long userNumber;
     //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -218,6 +222,7 @@ public class ProfileFragment extends Fragment {
                 }
 
                 if(documentSnapshot.exists()){
+
                     String address = documentSnapshot.getString(HOME_ADDRESS);
                     String job = documentSnapshot.getString(OCCUPATION);
                     String number = documentSnapshot.getString(CONTACT_NUMBER);

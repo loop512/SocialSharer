@@ -42,8 +42,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -56,6 +58,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Random;
+
+import javax.annotation.Nullable;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -86,6 +90,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private boolean firstTime = true;
     private StorageReference storageRef;
     private HashMap<String, String> userEmails = new HashMap<>();
+    private User myself = null;
+
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -103,6 +109,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         userEmail = shared.getString("email", "");
         nickName = shared.getString("nickName", "");
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
+        createMyself();
     }
 
     @Override
@@ -493,4 +500,24 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         return newBitmap;
     }
 
+    private void createMyself(){
+        DocumentReference docRef = db.collection("users")
+                .document(userEmail);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()){
+                    DocumentSnapshot document = task.getResult();
+                    myself = CommonFunctions.createUser(document, null);
+                }
+            }
+        });
+    }
+
+    private void rankingRecommend(){
+        //TODO
+        for(User user: recommendUserList){
+
+        }
+    }
 }
