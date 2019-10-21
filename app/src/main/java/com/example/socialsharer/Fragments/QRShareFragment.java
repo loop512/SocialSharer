@@ -63,6 +63,7 @@ public class QRShareFragment extends Fragment {
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private String email = auth.getCurrentUser().getEmail().toString();
     private StorageReference sRef = FirebaseStorage.getInstance().getReference(email);
+    private String userName = auth.getCurrentUser().getDisplayName().toString();
     private static final String QR_CODE = "QRCODE";
     OutputStream  outputStream;
     private static final String TAG = "QRShareFragment";
@@ -111,7 +112,7 @@ public class QRShareFragment extends Fragment {
         try {
             if(email != null){
                 MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
-                BitMatrix bitMatrix = multiFormatWriter.encode(email, BarcodeFormat.QR_CODE,500,500);
+                BitMatrix bitMatrix = multiFormatWriter.encode(email+" "+userName, BarcodeFormat.QR_CODE,500,500);
                 BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
                 final Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
                     qrImage.setImageBitmap(bitmap);
