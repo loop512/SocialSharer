@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -53,11 +54,10 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        Intent previous = getIntent();
-        Bundle bundle = previous.getExtras();
-        if (bundle != null){
-            userNumber = (long) bundle.get("userNumber");
-        }
+
+        SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
+        userNumber = shared.getLong("userNumber", 0);
+        Log.d("userNumberShared", Long.toString(userNumber));
 
         setContentView(R.layout.activity_register);
         getSupportActionBar().setTitle(R.string.title_activity_register);
@@ -72,11 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 createAccount(mEmailField.getText().toString(), mPasswordField.getText().toString());
-//                Intent startNext = new Intent(RegisterActivity.this,
-//                        EditProfileActivity.class);
-//                startNext.putExtra("userNumber", userNumber);
-//                startNext.putExtra("email", userEmail);
-//                startActivity(startNext);
+                saveChanges();
             }
         });
     }
@@ -99,9 +95,6 @@ public class RegisterActivity extends AppCompatActivity {
                             user.updateProfile(profileUpdates);
                             Intent startNext = new Intent(RegisterActivity.this,
                                     EditProfileActivity.class);
-                            startNext.putExtra("email", mEmailField.getText().toString());
-                            startNext.putExtra("name", mFullnameField.getText().toString());
-                            startNext.putExtra("userNumber", userNumber);
                             startActivity(startNext);
                             finish();
                         } else{
@@ -134,7 +127,7 @@ public class RegisterActivity extends AppCompatActivity {
         if(TextUtils.isEmpty(email)){
             mEmailField.setError("Required.");
             valid = false;
-        } else if(emailFormat == false){
+        } else if(!emailFormat){
             mEmailField.setError("Email field is not email format");
             valid = false;
         }
@@ -160,7 +153,7 @@ public class RegisterActivity extends AppCompatActivity {
         return valid;
     }
 
-    public void saveChanges(View v){
+    public void saveChanges(){
         Map<String, Object> change = new HashMap<>();
         change.put(INDEX, userNumber+1);
 
@@ -171,6 +164,9 @@ public class RegisterActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "Success update to database");
+                        SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = shared.edit();
+                        editor.putLong("userNumber", userNumber+1).commit();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -180,7 +176,7 @@ public class RegisterActivity extends AppCompatActivity {
                     }
                 });
 
-        db.collection("users").document(mEmailField.getText().toString()).update(change)
+        db.collection("users").document(mEmailField.getText().toString()).set(change)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

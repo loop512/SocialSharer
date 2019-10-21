@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -55,6 +56,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Random;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
@@ -117,14 +120,18 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         db = FirebaseFirestore.getInstance();
 
         // Get required information from previous activity
-        Bundle bundle = getArguments();
-        userEmail = bundle.getString("email");
-        userNumber = bundle.getLong("userNumber");
-        try{
-            nickName = bundle.getString("nickName");
-        } catch (Error error){
-            nickName = null;
-        }
+//        Bundle bundle = getArguments();
+////        userEmail = bundle.getString("email");
+////        userNumber = bundle.getLong("userNumber");
+////        try{
+////            nickName = bundle.getString("nickName");
+////        } catch (Error error){
+////            nickName = null;
+////        }
+        SharedPreferences shared = getActivity().getSharedPreferences("SharedInformation", MODE_PRIVATE);
+        userNumber = shared.getLong("userNumber", 0);
+        userEmail = shared.getString("email", "");
+        nickName = shared.getString("nickName", "");
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
     }
 

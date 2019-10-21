@@ -61,12 +61,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // log out user if already login but restart
-        try{
-            FirebaseAuth.getInstance().signOut();
-            Log.i(TAG, "Restart app, log out");
-        } catch (Exception e){
-           // Start of app, not need to log out
-        }
+        // comment this one, user can log out thourgh signout button in setting fragment
+//        try{
+//            FirebaseAuth.getInstance().signOut();
+//            Log.i(TAG, "Restart app, log out");
+//        } catch (Exception e){
+//           // Start of app, not need to log out
+//        }
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -86,10 +87,6 @@ public class LoginActivity extends AppCompatActivity {
         if (user != null){
             Intent startNext = new Intent(LoginActivity.this,
                     MainActivity.class);
-            startNext.putExtra("email", user.getEmail());
-            SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
-            long userNumber = shared.getLong("userNumber", 0);
-            startNext.putExtra("userNumber", userNumber);
             startActivity(startNext);
             finish();
         }
@@ -189,7 +186,6 @@ public class LoginActivity extends AppCompatActivity {
                 // If create account, pass user number to next activity
                 Intent startNext = new Intent(LoginActivity.this,
                         ForgotPasswordActivity.class);
-                startNext.putExtra("userNumber", userNumber);
                 startActivity(startNext);
             }
         });
@@ -200,7 +196,6 @@ public class LoginActivity extends AppCompatActivity {
                 // If create account, pass user number to next activity
                 Intent startNext = new Intent(LoginActivity.this,
                         RegisterActivity.class);
-                startNext.putExtra("userNumber", userNumber);
                 startActivity(startNext);
             }
         });
@@ -252,17 +247,13 @@ public class LoginActivity extends AppCompatActivity {
                         if(task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Log.i(TAG, "welcome " + user.getDisplayName());
-                            Toast.makeText(LoginActivity.this, "hello", Toast.LENGTH_SHORT).show();
                             Toast.makeText(LoginActivity.this,"welcome " + user.getDisplayName(), Toast.LENGTH_SHORT).show();
-                            SharedPreferences shared = getSharedPreferences("userInformation", MODE_PRIVATE);
+                            SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
                             SharedPreferences.Editor editor = shared.edit();
-                            editor.putString("uname", user.getDisplayName()).commit();
+                            editor.putString("nickName", user.getDisplayName()).commit();
                             editor.putString("email", user.getEmail()).commit();
                             Intent startNext = new Intent(LoginActivity.this,
                                     MainActivity.class);
-                            startNext.putExtra("userNumber", userNumber);
-                            startNext.putExtra("email", user.getEmail());
-                            startNext.putExtra("uname", user.getDisplayName());
                             startActivity(startNext);
                             finish();
                         } else {

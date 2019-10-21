@@ -3,6 +3,7 @@ package com.example.socialsharer;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -81,13 +82,9 @@ public class MainActivity extends AppCompatActivity
         mAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference(mAuth.getCurrentUser().getEmail());
 
-        Intent previous = getIntent();
-        Bundle bundle = previous.getExtras();
-        if (bundle != null){
-            // Required information, please make sure pass this information
-            userEmail = (String) bundle.get("email");
-            userNumber = (long) bundle.get("userNumber");
-        }
+        SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
+        userNumber = shared.getLong("userNumber", 0);
+        userEmail = mAuth.getCurrentUser().getEmail();
 
         Log.i(TAG, "Register email: " + userEmail + " userNumber: " + userNumber);
 
@@ -103,7 +100,7 @@ public class MainActivity extends AppCompatActivity
 
         navigationView.setCheckedItem(R.id.nav_profile);
         Fragment fragment = new ProfileFragment();
-        fragment.setArguments(bundle);
+//        fragment.setArguments(bundle);
         setTitle(R.string.menu_profile);
         loadFragment(fragment, "profile");
         navigationView.setNavigationItemSelectedListener(this);
