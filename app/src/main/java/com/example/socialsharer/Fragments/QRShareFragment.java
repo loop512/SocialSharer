@@ -1,11 +1,14 @@
 package com.example.socialsharer.Fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +64,8 @@ public class QRShareFragment extends Fragment {
     private String email = auth.getCurrentUser().getEmail().toString();
     private StorageReference sRef = FirebaseStorage.getInstance().getReference(email);
     private static final String QR_CODE = "QRCODE";
-
+    OutputStream  outputStream;
+    private static final String TAG = "QRShareFragment";
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -109,7 +113,7 @@ public class QRShareFragment extends Fragment {
                 MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
                 BitMatrix bitMatrix = multiFormatWriter.encode(email, BarcodeFormat.QR_CODE,500,500);
                 BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-                Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+                final Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
                     qrImage.setImageBitmap(bitmap);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -128,6 +132,36 @@ public class QRShareFragment extends Fragment {
                     }
                 });
 
+                saveQR.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        File path = Environment.getExternalStorageDirectory();
+                        File dir = new File(path+"/QrCode/");
+                        dir.mkdirs();
+                        File file = new File(dir, "User_QR_Code.jpg");
+                        try {
+                            outputStream = new FileOutputStream(file);
+
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        }
+
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                        Toast.makeText(getActivity(), "QR Code saved to your photos.", Toast.LENGTH_SHORT).show();
+                        try {
+                            outputStream.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            outputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                });
             }
         } catch (WriterException e){
             e.printStackTrace();
