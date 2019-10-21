@@ -1,8 +1,10 @@
 package com.example.socialsharer.Fragments;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -17,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
@@ -112,7 +115,7 @@ public class QRShareFragment extends Fragment {
         try {
             if(email != null){
                 MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
-                BitMatrix bitMatrix = multiFormatWriter.encode(email+" "+userName, BarcodeFormat.QR_CODE,500,500);
+                BitMatrix bitMatrix = multiFormatWriter.encode(email+"|"+userName, BarcodeFormat.QR_CODE,500,500);
                 BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
                 final Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
                     qrImage.setImageBitmap(bitmap);
@@ -137,18 +140,26 @@ public class QRShareFragment extends Fragment {
                     @Override
                     public void onClick(View v) {
                         File path = Environment.getExternalStorageDirectory();
-                        File dir = new File(path+"/QrCode/");
+                        File dir = new File(path + "/QrCode/");
                         dir.mkdirs();
+                        Log.i(TAG, "make dir:" + Environment.getExternalStorageDirectory());
                         File file = new File(dir, "User_QR_Code.jpg");
+                        if(!file.exists()){
+                            try{
+                                file.createNewFile();
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
                         try {
                             outputStream = new FileOutputStream(file);
-
                         } catch (FileNotFoundException e) {
-                            e.printStackTrace();
+                            Log.i(TAG, "can't create file, check permission");
                         }
 
                         bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
-                        Toast.makeText(getActivity(), "QR Code saved to your photos.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(),
+                                "QR Code saved to your photos.", Toast.LENGTH_SHORT).show();
                         try {
                             outputStream.flush();
                         } catch (IOException e) {
@@ -159,8 +170,6 @@ public class QRShareFragment extends Fragment {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-
-
                     }
                 });
             }
@@ -175,9 +184,6 @@ public class QRShareFragment extends Fragment {
                 startActivity(startNext);
             }
         });
-
         return view;
-
     }
-
 }

@@ -26,6 +26,10 @@
             android:icon="@drawable/ic_menu_send"
             android:title="@string/menu_requests" />
         <item
+            android:id="@+id/nav_sent_requests"
+            android:icon="@drawable/ic_menu_slideshow"
+            android:title="@string/menu_sent_requests" />
+        <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/menu_settings" />

@@ -1,6 +1,15 @@
 package com.example.socialsharer.Fragments;
+
 /**
- *  This class change the image of a photo into a image circled with a blue circle
+ *  This class change a bit map object created from an image
+ *  into a image circled with a blue circle.
+ *  Modified by CHENG, ZHANG 16/10/2019
+ *  Original author Daniel Nugent on stackoverflow
+ *
+ *  This class only contains paint image,
+ *  the plot image function is different from original author's solution
+ *  Our plot image function is in MapShare fragment
+ *  which support dynamic plot images instead of just once.
  */
 
 import android.graphics.Bitmap;
@@ -12,48 +21,52 @@ import android.graphics.Path;
 import android.graphics.Shader;
 
 public class CircleImage implements com.squareup.picasso.Transformation {
-    private int photoMargin = 15;
-    private int margin = 8;
-    private int triangleMargin = 7;
 
     @Override
     public Bitmap transform(final Bitmap source) {
-        int size = Math.min(source.getWidth(), source.getHeight());
-        float r = size/2f;
+        int imageSize = Math.min(source.getWidth(), source.getHeight());
+        float r = imageSize/2f;
+        int triangleMargin = 7;
+        int margin = 8;
+        int photoMargin = 15;
 
-        Bitmap output = Bitmap.createBitmap(size + triangleMargin,
-                size + triangleMargin, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
+        // Change the size of the marker
+        Bitmap paintedImage = Bitmap.createBitmap(imageSize + triangleMargin,
+                imageSize + triangleMargin, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(paintedImage);
 
+        // paint a circle outside the image with color #00FFE4 light blue
         Paint circlePainter = new Paint();
         circlePainter.setAntiAlias(true);
         circlePainter.setColor(Color.parseColor("#00FFE4"));
         circlePainter.setStrokeWidth(margin);
-        canvas.drawCircle(r, r, r-margin, circlePainter);
+        canvas.drawCircle(r, r, r- margin, circlePainter);
 
+        // paint a triangle below the image with color #00FFE4 light blue
         Paint trianglePainter = new Paint(Paint.ANTI_ALIAS_FLAG);
         trianglePainter.setStrokeWidth(2);
         trianglePainter.setColor(Color.parseColor("#00FFE4"));
         trianglePainter.setStyle(Paint.Style.FILL_AND_STROKE);
         trianglePainter.setAntiAlias(true);
         Path triangle = new Path();
+        // set the location of the triangle
         triangle.setFillType(Path.FillType.EVEN_ODD);
-        triangle.moveTo(size-margin, size / 2);
-        triangle.lineTo(size/2, size+triangleMargin);
-        triangle.lineTo(margin, size/2);
+        triangle.moveTo(imageSize- margin, imageSize / 2);
+        triangle.lineTo(imageSize/2, imageSize+ triangleMargin);
+        triangle.lineTo(margin, imageSize/2);
         triangle.close();
         canvas.drawPath(triangle, trianglePainter);
 
+        // paint shade on the image
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setShader(new BitmapShader(source, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-        canvas.drawCircle(r, r, r-photoMargin, paint);
+        canvas.drawCircle(r, r, r- photoMargin, paint);
 
-        if (source != output) {
+        if (source != paintedImage) {
             source.recycle();
         }
-
-        return output;
+        return paintedImage;
     }
 
     @Override

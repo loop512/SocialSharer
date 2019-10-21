@@ -7,7 +7,7 @@
     tools:context=".Fragments.ContactsFragment">
 
     <LinearLayout
-        android:id="@+id/layout_contacts"
+        android:id="@+id/layout_requests"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginStart="8dp"
@@ -19,19 +19,19 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <SearchView
-            android:id="@+id/search_contacts"
+            android:id="@+id/search_sent_requests"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/border"
             android:queryBackground="@android:color/transparent"
             android:iconifiedByDefault="false"
-            android:queryHint="@string/search_contacts"
+            android:queryHint="@string/search_sent_requests"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <ListView
-            android:id="@+id/contact_list"
+            android:id="@+id/sent_requests_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="8dp"
@@ -44,8 +44,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:id="@+id/empty"
-            android:text="@string/empty_contacts"
+            android:id="@+id/sent_requests_empty"
+            android:text="@string/sent_requests_empty"
             android:textSize="26sp"
             android:textStyle="bold"
             android:layout_marginTop="15dp"/>

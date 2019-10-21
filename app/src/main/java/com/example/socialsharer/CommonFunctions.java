@@ -27,7 +27,7 @@ import java.util.Map;
 
 public class CommonFunctions {
 
-    public static void sendRequest(final Activity activity, final String current_email,
+    public static void sendRequest(final Context activity, final String current_email,
                             final String email, final String nickname,
                             final String TAG){
         // document reference for friend
@@ -74,14 +74,27 @@ public class CommonFunctions {
                                 Toast.makeText(activity, "User " + nickname
                                                 + " is already your friend!"
                                         , Toast.LENGTH_SHORT).show();
-                            } else if (requestState == 2){
-                                // Request want rejected, resent the request.
+                            } else if (requestState == 2 || requestState == 5){
+                                // Request was rejected, resent the request.
                                 documentRef.set(request, SetOptions.merge());
                                 setRequestState(activity, email, receive,
                                         feedbackSuccess, feedbackInternet, true, TAG,
                                         null, null);
+                            } else if (requestState == 4){
+                                // also receive request from that user, directly add friend
+                                feedbackSuccess = "User " + nickname
+                                        + " also sent a request to you,"
+                                        + " successfully add as your contact.";
+                                request.put(email, 3);
+                                receive.put(current_email, 3);
+                                documentRef.set(request, SetOptions.merge());
+                                setRequestState(activity, email, receive,
+                                        feedbackSuccess, feedbackInternet, true, TAG,
+                                        null, null);
+                            } else {
+                                // Impossible to reach here, but leave for future development
+                                Log.i(TAG, "Unknown state");
                             }
-                            // TODO received request, directly add friend
                         }
                     } else {
                         // Haven't sent request to anyone, create document and send request

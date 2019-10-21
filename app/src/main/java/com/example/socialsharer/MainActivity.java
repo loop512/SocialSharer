@@ -2,6 +2,7 @@ package com.example.socialsharer;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -21,16 +23,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
-import com.example.socialsharer.Fragments.CircleImage;
 import com.example.socialsharer.Fragments.ContactsFragment;
 import com.example.socialsharer.Fragments.MapShareFragment;
 import com.example.socialsharer.Fragments.ProfileFragment;
 import com.example.socialsharer.Fragments.QRShareFragment;
 import com.example.socialsharer.Fragments.RequestFragment;
+import com.example.socialsharer.Fragments.SentFragment;
 import com.example.socialsharer.Fragments.SettingsFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -38,17 +39,19 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -69,6 +72,7 @@ public class MainActivity extends AppCompatActivity
     private CircleImageView profileImage;
     private TextView profileName;
     private TextView profileEmail;
+    private Map<String, Object> currentRequest;
 
     private FirebaseAuth mAuth;
     private StorageReference storageRef;
@@ -109,6 +113,8 @@ public class MainActivity extends AppCompatActivity
         profileName = navigationView.getHeaderView(0).findViewById(R.id.drawer_profile_name);
         profileEmail = navigationView.getHeaderView(0).findViewById(R.id.drawer_profile_email);
         getBasicProfile();
+
+        listener();
     }
 
     @Override
@@ -178,6 +184,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_requests){
             fragment = new RequestFragment();
             tag = "requests";
+        } else if (id == R.id.nav_sent_requests){
+            fragment = new SentFragment();
+            tag = "sent_requests";
         }
         else {
             fragment = new ProfileFragment();
@@ -215,6 +224,11 @@ public class MainActivity extends AppCompatActivity
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION);
 
+        boolean shouldProvideRationale_storage =
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+
         String[] permissions = new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -225,7 +239,7 @@ public class MainActivity extends AppCompatActivity
                 Manifest.permission.READ_EXTERNAL_STORAGE,
         };
 
-        if (shouldProvideRationale) {
+        if (shouldProvideRationale && shouldProvideRationale_storage) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
         } else {
             Log.i(TAG, "Requesting permission");
@@ -253,6 +267,151 @@ public class MainActivity extends AppCompatActivity
         });
         profileName.setText(mAuth.getCurrentUser().getDisplayName());
         profileEmail.setText(mAuth.getCurrentUser().getEmail());
+    }
+
+    private void listener(){
+        final DocumentReference requestDocRef =
+                db.collection("request").document(userEmail);
+        requestDocRef.addSnapshotListener(MetadataChanges.INCLUDE,
+                new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if(e != null){
+                    Log.i(TAG, "Fail to listen to request," +
+                            " still can manually receive request");
+                }
+
+                String source = snapshot != null && snapshot.getMetadata().hasPendingWrites()
+                        ? "Local" : "Server";
+
+                if (snapshot != null && snapshot.exists()){
+                    Map<String, Object> tempRequest = snapshot.getData();
+
+                    compare(tempRequest);
+
+                    Log.d(TAG, source + " data: " + snapshot.getData());
+                } else {
+                    Log.d(TAG, source + " data: null");
+                }
+            }
+        });
+    }
+
+    void compare(Map<String, Object> temp){
+        if (currentRequest == null){
+            // initialize, record current state!
+            currentRequest = temp;
+        } else {
+            // state changed!
+            Set users = temp.keySet();
+            for(Object user:users){
+                if (!currentRequest.containsKey(user)
+                        || currentRequest.get(user) != temp.get(user)){
+                    // update found, compare and toast
+                    long state = (long) temp.get(user);
+                    final int toast_state;
+                    final String default_toast;
+                    Log.i(TAG, "Server new state: " + state);
+                    if(state == 2){
+                        if(currentRequest.containsKey(user)){
+                            long current_state = (long)currentRequest.get(user);
+                            Log.i(TAG, Long.toString(current_state));
+                            if (current_state == 1){
+                                // request rejected by that user
+                                toast_state = 2;
+                                default_toast = "You have an rejected request," +
+                                        " check your sent requests";
+                                Log.i(TAG, "new rejection");
+                            } else {
+                                // removed by that user
+                                toast_state = 1;
+                                default_toast =
+                                        "You have been deleted by a user, check your contacts.";
+                                Log.i(TAG, "new deletion");
+                            }
+                        } else {
+                            // removed by that user
+                            toast_state = 1;
+                            default_toast =
+                                    "You have been deleted by a user, check your contacts.";
+                            Log.i(TAG, "new deletion");
+                        }
+                    } else if (state == 3){
+                        // request confirmed by that user
+                        toast_state = 3;
+                        default_toast = "You have a new confirmed request," +
+                                " check your contacts.";
+                    } else if (state == 4){
+                        // received request from that user
+                        toast_state = 4;
+                        default_toast = "You received a new friend request," +
+                                "check your received request.";
+                    } else {
+                        toast_state = -1;
+                        default_toast = null;
+                    }
+                    compareToast(this, user, toast_state, default_toast);
+                }
+            }
+            currentRequest = temp;
+        }
+    }
+
+    private void compareToast(final Context activity, Object user,
+                              final int toast_state, final String default_toast){
+        if (toast_state != -1){
+            String email = (String) user;
+            DocumentReference docRef = db.collection("users")
+                    .document(email);
+            docRef.get().addOnCompleteListener(
+                    new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()){
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()){
+                                    if (document.get("nickName") != null){
+                                        String username = (String) document.get("nickName");
+                                        String toast;
+                                        if (toast_state == 1){
+                                            // been deleted by that user
+                                            toast = "You have been deleted by " + username +
+                                                    ", check your contacts.";
+                                        } else if (toast_state == 2){
+                                            // been rejected by that user
+                                            toast = "Your request have been rejected by "
+                                                    + username + ", check your sent requests";
+                                        } else if (toast_state == 3) {
+                                            // been confirmed by that user
+                                            toast = "Your request have been confirmed by "
+                                                    + username + ", check your sent requests";
+                                        } else {
+                                            // receive request from that user
+                                            toast = "You received a new friend request from "
+                                                    + username + ", check your received request.";
+                                        }
+                                        // toast user to inform the request state is changed
+                                        Toast.makeText(activity,
+                                                toast, Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        // User has no nick name, using default
+                                        Toast.makeText(activity,
+                                                default_toast, Toast.LENGTH_SHORT).show();
+                                    }
+                                } else {
+                                    // Document not exist, use default, this usually won't happened.
+                                    Toast.makeText(activity,
+                                            default_toast, Toast.LENGTH_SHORT).show();
+                                }
+                            } else {
+                                // Fail connect to fire base store database, use default toast
+                                Toast.makeText(activity,
+                                        default_toast, Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
     }
 }
 

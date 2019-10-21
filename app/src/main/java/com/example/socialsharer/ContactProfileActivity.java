@@ -1,11 +1,10 @@
 package com.example.socialsharer;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.socialsharer.data.User;
 
@@ -29,6 +27,7 @@ public class ContactProfileActivity extends AppCompatActivity {
     private static String TAG = "ContactProfileActivity";
     private static String NOTPROVIDED = "Not provided";
     private static String REQUIREACCEPT = "Accept the request to view this information";
+    private static String NOTACCEPTED = "Can not access without permission";
 
     private String userEmail;
     private User user;
@@ -75,6 +74,14 @@ public class ContactProfileActivity extends AppCompatActivity {
                     processRequest(deleteButton, "Deleted", "delete", v);
                 }
             });
+        } else if (state.equals("sent_request_fragment")) {
+            addButton.setVisibility(View.INVISIBLE);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    processRequest(deleteButton, "Deleted", "remove", v);
+                }
+            });
         } else if (state.equals("request_fragment")) {
             // Set delete button text with reject
             deleteButton.setText(R.string.reject);
@@ -91,10 +98,8 @@ public class ContactProfileActivity extends AppCompatActivity {
             addButton.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
                 @Override
                 public void afterTextChanged(Editable s) {
                     if(s.toString().equals("Added")){
@@ -103,7 +108,6 @@ public class ContactProfileActivity extends AppCompatActivity {
                     }
                 }
             });
-
             // Reject the current request
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -111,15 +115,12 @@ public class ContactProfileActivity extends AppCompatActivity {
                     processRequest(deleteButton, "Rejected", "reject", v);
                 }
             });
-
             // if message rejected, disable accept button
             deleteButton.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
                 @Override
                 public void afterTextChanged(Editable s) {
                     if(s.toString().equals("Rejected")){
@@ -128,7 +129,6 @@ public class ContactProfileActivity extends AppCompatActivity {
                     }
                 }
             });
-
         }
 
         // Set go back button
@@ -152,7 +152,11 @@ public class ContactProfileActivity extends AppCompatActivity {
                                 String state, View v){
         // Create success and fail feedback for accept/reject request
         String successFeedback = "Successfully " + state + " user " + profileName.getText()
-                + "'s request, now you can find his information in contacts!";
+                + "'s request.";
+        if(state.equals("remove")){
+            successFeedback = "Successfully delete your request sent to user "
+                    + profileName.getText() + ".";
+        }
         String failFeedback = "Fail to " + state + " user " + profileName
                 + "'s request, check your internet connection or permission.";
         int my;
@@ -161,9 +165,12 @@ public class ContactProfileActivity extends AppCompatActivity {
         if(state.equals("accept")){
             my = 3;
             request = 3;
-        } else {
+        } else if(state.equals("delete")) {
             my = 5;
             request = 2;
+        } else {
+            my = 6;
+            request = 6;
         }
 
         // Create update map for fire base
@@ -218,6 +225,10 @@ public class ContactProfileActivity extends AppCompatActivity {
         if (state.equals("request_fragment")){
             if (textView != profileName && textView != profileJob && context != null) {
                 context = REQUIREACCEPT;
+            }
+        } else if (state.equals("sent_request_fragment")){
+            if (textView != profileName && textView != profileJob && context != null) {
+                context = NOTACCEPTED;
             }
         }
         if (context != null){

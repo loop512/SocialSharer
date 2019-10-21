@@ -1,5 +1,6 @@
 package com.example.socialsharer.Fragments;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -50,6 +52,7 @@ public class ContactsFragment extends Fragment {
     private static final String TAG = "ContactsFragment";
 
     private int state = 3;
+    private int state2 = -1;
     private String local_path;
     private String userEmail;
     private long userNumber;
@@ -67,6 +70,9 @@ public class ContactsFragment extends Fragment {
     private int searchId = R.id.search_contacts;
     private String fragmentState = "contact_fragment";
     private boolean firstOpen = true;
+    private ProgressDialog dialog;
+    private String info1;
+    private String info2;
 
     public ContactsFragment() {
         // Required empty public constructor
@@ -106,6 +112,7 @@ public class ContactsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(layoutId, container, false);
+
         listView = view.findViewById(listViewId);
         search = view.findViewById(searchId);
 
@@ -116,18 +123,31 @@ public class ContactsFragment extends Fragment {
         contactAdapter = new ContactAdapter(getContext(),contactList);
         listView.setAdapter(contactAdapter);
 
-        getList(state);
+        listView.setVisibility(View.INVISIBLE);
+
+        updateList(state, state2, info1, info2);
+
+        String display;
+        if (fragmentState.equals("contact_fragment")){
+            display = "contacts";
+        } else if (fragmentState.equals("request_fragment")){
+            display = "requests";
+        } else {
+            display = "previous sent requests";
+        }
+
+        dialog = ProgressDialog.show(getContext(), "",
+                "Loading " + display + ". Please wait...", true);
 
         listView.setOnItemClickListener(
-                new AdapterView.OnItemClickListener()
-                {
+                new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View view,
-                                                int position, long id) {
+                                            int position, long id) {
                         Intent intent = new Intent(getActivity(), ContactProfileActivity.class);
                         intent.putExtra("state", fragmentState);
                         Log.i(TAG, userEmail);
-                        User clickedUser  = contactUserList.get(position);
+                        User clickedUser = contactUserList.get(position);
                         intent.putExtra("contact", clickedUser);
                         intent.putExtra("userEmail", userEmail);
                         startActivity(intent);
@@ -136,7 +156,7 @@ public class ContactsFragment extends Fragment {
         return view;
     }
 
-    private void downloadImage(final String userEmail) {
+    private void downloadImage(final String userEmail, final String info) {
         final String path = userEmail + "/Photo";
         StorageReference imageRef = storageRef.child(path);
         try {
@@ -147,23 +167,26 @@ public class ContactsFragment extends Fragment {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             Log.i(TAG, "User image Downloaded");
                             local_path = localFile.getAbsolutePath();
-                            addUserToList(userEmail, local_path);
+                            addUserToList(userEmail, local_path, info);
+                            dismissDialog();
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
-                    addUserToList(userEmail, null);
+                    dismissDialog();
+                    addUserToList(userEmail, null, info);
                     Log.i(TAG, "Fail to download user image, using default");
                 }
             });
         } catch (Exception e) {
+            dismissDialog();
             Toast.makeText(getActivity(), "Fail to load contacts information," +
                     " check your internet connection.", Toast.LENGTH_SHORT).show();
             Log.i(TAG, "Fail to create temp file");
         }
     }
 
-    private void addUserToList(final String email, final String path){
+    private void addUserToList(final String email, final String path, final String info){
         final DocumentReference docRef = db.collection("users")
                 .document(email);
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -186,13 +209,17 @@ public class ContactsFragment extends Fragment {
                 } else {
                     Log.i(TAG, "Connect to fire base failed, check internet connection");
                 }
+                String displayName_withInfo = displayName;
+                if (info != null){
+                    displayName_withInfo += " (" + info + ")";
+                }
                 if (path == null) {
-                    contactList.add(new Contact(displayName, R.drawable.unknown));
+                    contactList.add(new Contact(displayName_withInfo, R.drawable.unknown));
                 } else {
                     Bitmap bitmap = BitmapFactory.decodeFile(path);
                     Bitmap scaledBitmap = Bitmap.createScaledBitmap(
                             bitmap, 48, 48, false);
-                    contactList.add(new Contact(displayName, scaledBitmap));
+                    contactList.add(new Contact(displayName_withInfo, scaledBitmap));
                 }
                 search.setVisibility(View.VISIBLE);
                 contactAdapter.notifyDataSetChanged();
@@ -200,7 +227,16 @@ public class ContactsFragment extends Fragment {
         });
     }
 
-    public void getList(final long state){
+    public void updateList(long state1, long state2, String info1, String info2){
+        if (state2 != -1){
+            getList(state1, info1);
+            getList(state2, info2);
+        } else {
+            getList(state1, null);
+        }
+    }
+
+    public void getList(final long state, final String info){
         final DocumentReference documentRef = db.collection("request")
                 .document(userEmail);
 
@@ -208,28 +244,54 @@ public class ContactsFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()){
+                    int contact_number = 0;
                     DocumentSnapshot document = task.getResult();
                     if(document.exists()){
                         Map<String, Object> requests;
                         requests = document.getData();
                         if (requests.size() != 0) {
-                            // Current user has potential contacts
+                            // Current user has potential requests/contacts
                             Set users = requests.keySet();
                             for(Object user: users){
                                 if((long) requests.get(user) == state){
-                                    downloadImage((String) user);
+                                    downloadImage((String) user, info);
+                                    contact_number += 1;
                                 }
                             }
+                            if (contact_number == 0){
+                                // No requests/contacts
+                                dismissDialog();
+                            }
+                        } else {
+                            // Current user has no requests/contacts,
+                            // but request document already exist
+                            dismissDialog();
                         }
+                    } else {
+                        // Current user has no requests/contacts
+                        dismissDialog();
                     }
-                    // Current user has no contacts
                 } else {
-                    Toast.makeText(getActivity(), "Fail to load contacts information," +
-                            " check your internet connection.", Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "Fail to get user friends, check internet connection");
+                    if(isAdded()){
+                        // Internet fail, can not reach fire base
+                        dismissDialog();
+                        Toast.makeText(getActivity(), "Fail to load contacts information," +
+                                " check your internet connection.", Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "Fail to get user friends, check internet connection");
+                    }
                 }
             }
         });
+    }
+
+    private void dismissDialog(){
+        if(dialog != null) {
+            dialog.dismiss();
+        }
+        if(listView.getVisibility()!= View.INVISIBLE) {
+            listView.setVisibility(View.VISIBLE);
+        }
+        contactAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -241,7 +303,7 @@ public class ContactsFragment extends Fragment {
             contactList.clear();
             contactUserList.clear();
             contactAdapter.notifyDataSetChanged();
-            getList(state);
+            updateList(state, state2, info1, info2);
         }
     }
 
@@ -252,6 +314,10 @@ public class ContactsFragment extends Fragment {
 
     void setState(int state){
         this.state = state;
+    }
+
+    void setState2(int state){
+        this.state2 = state;
     }
 
     void setEmptyId(int id){
@@ -272,5 +338,13 @@ public class ContactsFragment extends Fragment {
 
     void setFragmentState(String state){
         this.fragmentState = state;
+    }
+
+    void setInfo1(String info1){
+        this.info1 = info1;
+    }
+
+    void setInfo2(String info2){
+        this.info2 = info2;
     }
 }
