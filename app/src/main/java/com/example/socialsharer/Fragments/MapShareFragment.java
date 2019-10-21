@@ -62,10 +62,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback, LocationListener{
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+
     private static final String TAG = "MapShareFragment";
 
     private MapView mMapView;
@@ -94,24 +91,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MapShareFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MapShareFragment newInstance(String param1, String param2) {
-        MapShareFragment fragment = new MapShareFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,15 +98,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         // Connect to fire base document database
         db = FirebaseFirestore.getInstance();
 
-        // Get required information from previous activity
-//        Bundle bundle = getArguments();
-////        userEmail = bundle.getString("email");
-////        userNumber = bundle.getLong("userNumber");
-////        try{
-////            nickName = bundle.getString("nickName");
-////        } catch (Error error){
-////            nickName = null;
-////        }
         SharedPreferences shared = getActivity().getSharedPreferences("SharedInformation", MODE_PRIVATE);
         userNumber = shared.getLong("userNumber", 0);
         userEmail = shared.getString("email", "");
@@ -208,24 +178,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
                             // User click on information window,
                             // ask again whether they want to send friend request
-                            new AlertDialog.Builder(getContext())
-                                    .setTitle("Send friend request to " + title)
-                                    .setMessage("Are you sure you want to sent a friend request to "
-                                            + title + "?")
-
-                                    // User click on yes, check and send request
-                                    .setPositiveButton("Send",
-                                            new DialogInterface.OnClickListener(){
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    CommonFunctions
-                                                            .sendRequest(getActivity(), userEmail,
-                                                            email, title, TAG);
-                                                    //sendRequest(userEmail, email, title);
-                                                }
-                                            })
-                                    // User click on no
-                                    .setNegativeButton("Cancel", null)
-                                    .show();
+                            CommonFunctions.sendRequestAlert(getActivity(), userEmail,
+                                    email, title, TAG);
                         }
                     });
                 }
@@ -362,6 +316,11 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             final String name = user.getNickName();
             final String introduction = user.getIntroduction();
             final LatLng userLocation = new LatLng(latitude, longitude);
+            final String facebook = user.getFacebook();
+            final String linkedin = user.getLinkedin();
+            final String wechat = user.getWechat();
+            final String ins = user.getInstagram();
+            final String twitter = user.getTwitter();
             try{
                 final File localFile = File.createTempFile("images", "jpg");
                 imageRef.getFile(localFile).addOnSuccessListener(
@@ -372,7 +331,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 String path = localFile.getAbsolutePath();
                                 Bitmap bitmap = BitmapFactory.decodeFile(path);
                                 addMarker(bitmap, opacity, userLocation,
-                                        name, introduction, path, email);
+                                        name, introduction, path, email,
+                                        facebook, linkedin, wechat, ins, twitter);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -381,7 +341,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                             Bitmap bitmap = BitmapFactory.decodeResource(
                                     getResources(), R.drawable.unknown);
                             addMarker(bitmap, opacity, userLocation,
-                                    name, introduction, null, email);
+                                    name, introduction, null, email,
+                                    facebook, linkedin, wechat, ins, twitter);
                             Log.i(TAG, "Fail to download user image, using default");
                         }
                     }
@@ -393,7 +354,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     }
 
     public void addMarker(Bitmap bitmap, float opacity, LatLng userLocation, String name,
-                          String introduction, String path_userImage, String email ){
+                          String introduction, String path_userImage, String email,
+                          String facebook, String linkedin, String wechat, String ins,
+                          String twitter){
         Bitmap smallBitMap = scaleBitmap(bitmap, 170, false);
         Bitmap handledBitmap = imageHandler.transform(smallBitMap);
         BitmapDescriptor bitmapDescriptor =
@@ -403,15 +366,19 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                 .position(userLocation)
                 .title(name)
                 .icon(bitmapDescriptor);
-        String info = "introduction|";
+        String social = facebook + " " + linkedin + " " + wechat + " " + ins + " " + twitter + " ";
+        String info = "";
         if (introduction != null) {
-            info += introduction+"&";
+            info += introduction + " ";
         } else {
-            info += "*null*" + "&";
+            info += "null" + " ";
         }
         if (path_userImage != null) {
-            info += "path|" + path_userImage+"&";
+            info += path_userImage + " ";
+        } else {
+            info += "null" + " ";
         }
+        info = social + info;
         marker.snippet(info);
         googleMap.addMarker(marker);
         userEmails.put(marker.getSnippet(), email);

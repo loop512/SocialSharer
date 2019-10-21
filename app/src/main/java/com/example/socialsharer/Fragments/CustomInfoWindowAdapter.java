@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,6 +18,7 @@ import java.io.File;
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     static String TAG = "infoWindowAdaper";
+    private static String NULLSTRING = "null";
 
     private Context myContext;
     private String message = "Click to send friend request to ";
@@ -33,37 +33,70 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                 R.layout.info_window, null);
 
         TextView user_name = view.findViewById(R.id.user_name);
+
         TextView user_introduction = view.findViewById(R.id.user_introduction);
         TextView user_occupation = view.findViewById(R.id.user_occupation);
         ImageView user_image = view.findViewById(R.id.user_image);
+        ImageView facebook_view = view.findViewById(R.id.icon_facebook);
+        ImageView linkedin_view = view.findViewById(R.id.icon_link);
+        ImageView wechat_view = view.findViewById(R.id.icon_wechat);
+        ImageView ins_view = view.findViewById(R.id.icon_ins);
+        ImageView twitter_view = view.findViewById(R.id.icon_twitter);
 
         user_name.setText(marker.getTitle());
-        String[] informations = marker.getSnippet().split("&");
-        String path;
+        user_occupation.setText(message);
+        String[] informations = marker.getSnippet().split(" ");
 
+        String facebook = informations[0];
+        String linkedin = informations[1];
+        String wechat = informations[2];
+        String ins = informations[3];
+        String twitter = informations[4];
+        String introduction = informations[5];
+        String path = informations[6];
         Log.i(TAG, marker.getSnippet());
 
-        for (String information: informations){
-            String[] command_context = information.split("\\|");
-            if(command_context[0].equals("introduction")){
-                if(!command_context[1].equals("*null*")) {
-                    user_introduction.setText(command_context[1]);
-                } else {
-                    user_introduction.setVisibility(TextView.INVISIBLE);
-                }
-            } else if (command_context[0].equals("path")){
-                path = command_context[1];
-                Log.i(TAG,"Path : " + path);
-                File file = new File(path);
-                Log.i(TAG,"file exist : " + file.exists());
-                Bitmap bitmap = BitmapFactory.decodeFile(path);
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(
-                            bitmap, 100, 90, false);
-                user_image.setImageBitmap(scaledBitmap);
-            }
+        if (!introduction.equals(NULLSTRING)) {
+            user_introduction.setText(introduction);
+        } else {
+            user_introduction.setVisibility(TextView.INVISIBLE);
         }
-        user_occupation.setText(message + marker.getTitle());
+        if (!path.equals(NULLSTRING)) {
+            File file = new File(path);
+            Log.i(TAG, "file exist : " + file.exists());
+            Bitmap bitmap = BitmapFactory.decodeFile(path);
+            Bitmap scaledBitmap = Bitmap.createScaledBitmap(
+                    bitmap, 100, 90, false);
+            user_image.setImageBitmap(scaledBitmap);
+        }
+
+        int id;
+        if (facebook.equals(NULLSTRING)){
+            id = R.drawable.facebook_grey;
+            setIcon(facebook, id, facebook_view);
+        }
+        if (linkedin.equals(NULLSTRING)){
+            id = R.drawable.linkedin_grey;
+            setIcon(facebook, id, linkedin_view);
+        }
+        if (wechat.equals(NULLSTRING)){
+            id = R.drawable.wechat_grey;
+            setIcon(facebook, id, wechat_view);
+        }
+        if (ins.equals(NULLSTRING)){
+            id = R.drawable.instagram_grey;
+            setIcon(facebook, id, ins_view);
+        }
+        if (twitter.equals(NULLSTRING)){
+            id = R.drawable.twitter_grey;
+            setIcon(facebook, id, twitter_view);
+        }
         return view;
+    }
+
+    private void setIcon(String check, int id, ImageView view){
+        Bitmap bitmap = BitmapFactory.decodeResource(myContext.getResources(), id);
+        view.setImageBitmap(bitmap);
     }
 
     @Override

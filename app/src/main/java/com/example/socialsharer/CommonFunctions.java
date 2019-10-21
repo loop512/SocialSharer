@@ -2,7 +2,9 @@ package com.example.socialsharer;
 
 import android.app.Activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -195,5 +197,28 @@ public class CommonFunctions {
         clipboard.setPrimaryClip(clip);
         Toast.makeText(context, "Information successfully " +
                 "copied  to clipboard", Toast.LENGTH_SHORT).show();
+    }
+
+    public static void sendRequestAlert(final Context context, final String currentUserEmail,
+                                        final String targetEmail, final String targetName,
+                                        final String TAG){
+        // Show a dialog to double check user's intention
+        new AlertDialog.Builder(context)
+                .setTitle("Send friend request to " + targetName)
+                .setMessage("Are you sure you want to sent a friend request to "
+                        + targetName + "?")
+
+                // User click on yes, check and send request
+                .setPositiveButton("Send",
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendRequest(context, currentUserEmail,
+                                                targetEmail, targetName, TAG);
+                                //sendRequest(userEmail, email, title);
+                            }
+                        })
+                // User click on no
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 }

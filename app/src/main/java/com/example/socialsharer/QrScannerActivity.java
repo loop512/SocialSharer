@@ -1,6 +1,8 @@
 package com.example.socialsharer;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.View;
@@ -62,12 +64,14 @@ public class QrScannerActivity extends AppCompatActivity implements ZXingScanner
 
                     @Override
                     public void onPermissionDenied(PermissionDeniedResponse response) {
-                        Toast.makeText(QrScannerActivity.this, "You must accept this permission to use the qr scanner", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(QrScannerActivity.this,
+                                "You must accept this permission to use the qr scanner",
+                                Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
-
+                    public void onPermissionRationaleShouldBeShown(
+                            PermissionRequest permission, PermissionToken token) {
                     }
                 })
                 .check();
@@ -89,6 +93,6 @@ public class QrScannerActivity extends AppCompatActivity implements ZXingScanner
         String targetEmail = results[0];
         String targetName = results[1];
 
-        CommonFunctions.sendRequest(this, userEmail, targetEmail, targetName, TAG);
+        CommonFunctions.sendRequestAlert(this, userEmail, targetEmail, targetName, TAG);
     }
 }
