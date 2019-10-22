@@ -2,8 +2,15 @@ package com.example.socialsharer.data;
 
 import java.io.Serializable;
 
+/**
+ * This is a basic class to store all information for each user
+ * Also provides functions to retrieve these values
+ */
 public class User implements Serializable {
 
+    // nickName is the display name,
+    // latitude and longitude are used to store user's last known location,
+    // imagePath is used to store the user's image if exist.
     private String email;
     private String nickName;
     private String introduction;
@@ -39,45 +46,32 @@ public class User implements Serializable {
         rankValue = 0;
     }
 
+    // Used for set user's image path
     public void setImagePath(String path){
         this.imagePath = path;
     }
 
+    // Set user's calculated value, used for ranking algorithm
     public void setRankValue(int value){ rankValue = value; }
 
+    // Rest are necessary functions to retrieve user information.
     public int getRankValue(){ return rankValue ;}
 
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
 
-    public String getNickName() {
-        return nickName;
-    }
+    public String getNickName() { return nickName; }
 
-    public String getIntroduction() {
-        return introduction;
-    }
+    public String getIntroduction() { return introduction; }
 
-    public Double getLatitude() {
-        return latitude;
-    }
+    public Double getLatitude() { return latitude; }
 
-    public Double getLongitude() {
-        return longitude;
-    }
+    public Double getLongitude() { return longitude; }
 
-    public String getOccupation() {
-        return occupation;
-    }
+    public String getOccupation() { return occupation; }
 
-    public String getImagePath() {
-        return imagePath;
-    }
+    public String getImagePath() { return imagePath; }
 
-    public String getContactNumber(){
-        return contactNumber;
-    }
+    public String getContactNumber(){ return contactNumber; }
 
     public String getFacebook(){ return facebook; }
 
