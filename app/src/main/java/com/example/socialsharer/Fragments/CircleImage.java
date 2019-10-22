@@ -22,6 +22,14 @@ import android.graphics.Shader;
 
 public class CircleImage implements com.squareup.picasso.Transformation {
 
+    /**
+     * This method takes a bit map object, and do following adjustments:
+     * 1. resize the image
+     * 2. paint a blue circle around the image
+     * 3. paint a blue triangle at the button of the image
+     * @param source a bit map object converted from the user's image
+     * @return a round image circled by blue outer edge
+     */
     @Override
     public Bitmap transform(final Bitmap source) {
         int imageSize = Math.min(source.getWidth(), source.getHeight());

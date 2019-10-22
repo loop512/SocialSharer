@@ -12,12 +12,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import com.example.socialsharer.CommonFunctions;
 import com.example.socialsharer.ContactProfileActivity;
 import com.example.socialsharer.R;
@@ -34,35 +31,35 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- *  Used for display contacts
+ *  This is the class used for display contacts of login user.
  */
 public class ContactsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+
     private static final String TAG = "ContactsFragment";
 
+    // state, state2 are used to query data base, and can be reset by calling set functions
+    // detailed state document is in the bottom main Activity functions:
+    // listener, compare, compare toast
     private int state = 3;
     private int state2 = -1;
+    // Store user image's local path, user email, the current contact list
     private String local_path;
     private String userEmail;
-    private long userNumber;
     private ArrayList<Contact> contactList;
     private ListView listView;
     private ContactAdapter contactAdapter;
-    private ArrayList<String> contacts;
+    // Database objects used for querying the database
     private StorageReference storageRef;
     private FirebaseFirestore db;
+    // A search view on top of the screen
     private SearchView search;
+    // Stores detailed contacts information which are User objects
     private ArrayList<User> contactUserList = new ArrayList<>();
     private int emptyId = R.id.empty;
     private int listViewId = R.id.contact_list;
@@ -79,29 +76,15 @@ public class ContactsFragment extends Fragment {
     }
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ContactsFragment.
+     * Connect to the database and get current user's email from main activity
+     * @param savedInstanceState
      */
-    private static ContactsFragment newInstance(String param1, String param2) {
-        ContactsFragment fragment = new ContactsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
             userEmail = bundle.getString("email");
-            userNumber = bundle.getLong("userNumber");
         }
         storageRef = FirebaseStorage.getInstance().getReference();
         db = FirebaseFirestore.getInstance();
@@ -113,20 +96,26 @@ public class ContactsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(layoutId, container, false);
 
+        // A search bar on top of the screen and a dynamic list view.
         listView = view.findViewById(listViewId);
         search = view.findViewById(searchId);
 
+        // First set to invisible while querying data base in case there are no contacts
         search.setVisibility(View.INVISIBLE);
 
+        // Set up dynamic list adapter
         contactList = new ArrayList<>();
         listView.setEmptyView(view.findViewById(emptyId));
         contactAdapter = new ContactAdapter(getContext(),contactList);
         listView.setAdapter(contactAdapter);
 
+        // First set to invisible until query finish or fail
         listView.setVisibility(View.INVISIBLE);
 
+        // This function queries database
         updateList(state, state2, info1, info2);
 
+        // Controls whether displaying contacts, received requests or previous sent requests.
         String display;
         if (fragmentState.equals("contact_fragment")){
             display = "contacts";
@@ -136,14 +125,18 @@ public class ContactsFragment extends Fragment {
             display = "previous sent requests";
         }
 
+        // A progress dialog, dismiss when the query finish or failed.
         dialog = ProgressDialog.show(getContext(), "",
                 "Loading " + display + ". Please wait...", true);
 
+        // Set on click listener
         listView.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> arg0, View view,
                                             int position, long id) {
+                        // Start next activity to show detailed information,
+                        // and pass necessary information to that activity
                         Intent intent = new Intent(getActivity(), ContactProfileActivity.class);
                         intent.putExtra("state", fragmentState);
                         Log.i(TAG, userEmail);
@@ -156,15 +149,27 @@ public class ContactsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * This method downloads given user's image from the database,
+     * and put necessary information (Only for sent request) together
+     * in the contactUserList for later display usage.
+     * Using default image if that user haven't upload his image
+     * @param userEmail the user's email used for downloading that user's image
+     * @param info Only used for sent request, display whether the request is waiting or rejected.
+     */
     private void downloadImage(final String userEmail, final String info) {
+        // Path in database which stores the photo
         final String path = userEmail + "/Photo";
         StorageReference imageRef = storageRef.child(path);
         try {
+            // Create a temp file for storing the image
             final File localFile = File.createTempFile("images", "jpg");
             imageRef.getFile(localFile).addOnSuccessListener(
                     new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            // User image successfully downloaded,
+                            // get the path and stores in User object
                             Log.i(TAG, "User image Downloaded");
                             local_path = localFile.getAbsolutePath();
                             addUserToList(userEmail, local_path, info);
@@ -173,12 +178,15 @@ public class ContactsFragment extends Fragment {
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {
+                    // Fail to download user image, using default image
                     dismissDialog();
                     addUserToList(userEmail, null, info);
                     Log.i(TAG, "Fail to download user image, using default");
                 }
             });
         } catch (Exception e) {
+            // Connection error, need user to check permission or internet connection.
+            // Usually won't happened, permission already asked.
             dismissDialog();
             Toast.makeText(getActivity(), "Fail to load contacts information," +
                     " check your internet connection.", Toast.LENGTH_SHORT).show();

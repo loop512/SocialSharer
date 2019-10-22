@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * This is a basic class to store all information for each user
- * Also provides functions to retrieve these values
+ * Also provides functions to retrieve these values.
  */
 public class User implements Serializable {
 
