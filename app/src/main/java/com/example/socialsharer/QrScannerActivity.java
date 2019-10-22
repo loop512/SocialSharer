@@ -94,5 +94,8 @@ public class QrScannerActivity extends AppCompatActivity implements ZXingScanner
         String targetName = results[1];
 
         CommonFunctions.sendRequestAlert(this, userEmail, targetEmail, targetName, TAG);
+
+        // Restart the camera! required otherwise the camera is stopped by ZXing and the UI stuck
+        scannerView.resumeCameraPreview(this);
     }
 }

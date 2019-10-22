@@ -95,7 +95,11 @@ public class CommonFunctions {
                                         null, null);
                             } else {
                                 // Impossible to reach here, but leave for future development
-                                Log.i(TAG, "Unknown state");
+                                Log.i(TAG, "Unknown state, resent request");
+                                documentRef.set(request, SetOptions.merge());
+                                setRequestState(activity, email, receive,
+                                        feedbackSuccess, feedbackInternet, true, TAG,
+                                        null, null);
                             }
                         }
                     } else {

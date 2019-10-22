@@ -1,9 +1,7 @@
 package com.example.socialsharer.Fragments;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -42,10 +40,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -58,8 +53,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.annotation.Nullable;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -80,18 +73,20 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private Runnable timeRunnable;
     private Runnable recommendRunnable;
     private Boolean permission = false;
-    private ArrayList<User> recommendUserList = new ArrayList();
+    private ArrayList<User> recommendUserList;
     private String userEmail;
     private long userNumber;
-    private ArrayList<Integer> selectedIndex = new ArrayList();
-    private int targetNumber = 3;
+    private ArrayList<Integer> selectedIndex;
+    private int randomNumber = 10;
+    private int targetNumber = 4;
+    private int choosedNumber;
     private String nickName;
         private CircleImage imageHandler = new CircleImage();
     private boolean firstTime = true;
     private StorageReference storageRef;
-    private HashMap<String, String> userEmails = new HashMap<>();
+    private HashMap<String, String> userEmails;
     private User myself = null;
-
+    private HashMap<Integer, Integer> valueMap;
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -128,6 +123,14 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
     @Override
     public void onMapReady(GoogleMap map) {
+        choosedNumber = 0;
+        recommendUserList = new ArrayList<>();
+        selectedIndex = new ArrayList<>();
+        valueMap = new HashMap<>();
+        userEmails = new HashMap<>();
+        selectedIndex = new ArrayList();
+        recommendUserList = new ArrayList();
+
         googleMap = map;
         if(isAdded()){
             // successful added can get context! required check, otherwise will cause crash
@@ -243,16 +246,6 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {}
-
-    // Calculate the distance between two points with give latitudes and longitudes
-    public float calculateDistance(Double latitudeA, Double longitudeA,
-                                    Double latitudeB, Double longitudeB){
-        float[] results = new float[1];
-        Location.distanceBetween(latitudeA, longitudeA,
-                latitudeB, longitudeB,
-                results);
-        return results[0];
-    }
 
     @Override
     public void onStop() {
@@ -399,7 +392,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             @Override
             public void run() {
                 Log.i(TAG, "Recommend list size " + recommendUserList.size());
-                if(recommendUserList.size() >= targetNumber){
+                if(recommendUserList.size() >= targetNumber && choosedNumber > randomNumber){
+                    // Not enough recommend user are selected or not enough user are sampled.
                     downloadImages();
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
@@ -409,6 +403,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         getDocument(index);
                         Log.i(TAG, "User: " + index);
                     }
+                    Log.i(TAG, "Target sampled value: " + randomNumber
+                            + "target number :" + targetNumber
+                            + "sampled number :" + choosedNumber);
                     Log.i(TAG, "Still fetching data from server.");
                     recommendHandler.postDelayed(recommendRunnable, 1000);
                 }
@@ -424,8 +421,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         int maxIndex = new Long(userNumber).intValue();
         ArrayList selectedList = new ArrayList();
         Random generater = new Random();
-        for (int currentNum = 0; currentNum < targetNumber; currentNum ++){
-            if(recommendUserList.size() + selectedList.size() >= targetNumber){
+        for (int currentNum = 0; currentNum < randomNumber; currentNum ++){
+            if(recommendUserList.size() + selectedList.size() >= randomNumber){
                 break;
             } else {
                 int nextInt = generater.nextInt(maxIndex);
@@ -450,22 +447,53 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 User newRecommendUser = CommonFunctions.createUser(document,
                                         null);
-                                if (newRecommendUser.getEmail().equals(userEmail)||
-                                        latitude == null || longitude == null){
-                                    targetNumber = targetNumber - 1;
-                                }
-                                else {
-                                    if(!containUser(nickName)){
-                                        Log.i(TAG, "add user: " +
-                                                newRecommendUser.getNickName());
-                                        Log.i(TAG, "add user's email: "
-                                                + newRecommendUser.getEmail());
-                                        recommendUserList.add(newRecommendUser);
-                                        Log.i(TAG, "Current size: "
-                                                + recommendUserList.size());
+                                if (newRecommendUser.getEmail().equals(userEmail)
+                                        || newRecommendUser.getLatitude() == null
+                                        || newRecommendUser.getLongitude() == null){
+                                    // first, don't add
+                                    // who doesn't have any location information
+                                    Log.i(TAG, "recommend list size: "
+                                            + recommendUserList.size());
+                                } else {
+                                    if(!containUser(newRecommendUser.getEmail())){
+                                        choosedNumber += 1;
+                                        Log.i(TAG, "sampled user number: "
+                                                + choosedNumber);
+                                        float distance = calculateDistance(latitude, longitude
+                                                , newRecommendUser.getLatitude()
+                                                , newRecommendUser.getLongitude());
+                                        if (distance > 200000){
+                                            Log.i(TAG, "recommend list size: "
+                                                    + recommendUserList.size());
+                                            //Then don't add those who are far away from current user
+                                        } else {
+                                            Log.i(TAG, "Current selected user: "
+                                                    + newRecommendUser.getEmail()
+                                                    + " distance: " + distance);
+                                            Log.i(TAG, "add user: " +
+                                                    newRecommendUser.getNickName());
+                                            Log.i(TAG, "add user's email: "
+                                                    + newRecommendUser.getEmail());
+                                            recommendUserList.add(newRecommendUser);
+                                            int listIndex = recommendUserList
+                                                    .indexOf(newRecommendUser);
+                                            setUserRankValue(recommendUserList
+                                                    .get(listIndex), listIndex);
+                                            Log.i(TAG, "Current size: "
+                                                    + recommendUserList.size());
+                                        }
                                     }
-                                    if(recommendUserList.size() == targetNumber){
-                                        break;
+                                    if(recommendUserList.size() > targetNumber){
+                                        int min = 9999;
+                                        int minIndex = 0;
+                                        for (int key: valueMap.keySet()){
+                                            int currentValue = valueMap.get(key);
+                                            if ((currentValue < min)){
+                                                minIndex = key;
+                                                min = currentValue;
+                                            }
+                                        }
+                                        recommendUserList.remove(minIndex);
                                     }
                                 }
                             }
@@ -476,9 +504,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                 });
     }
 
-    private boolean containUser(String nickName){
+    private boolean containUser(String email){
         for(User user: recommendUserList){
-            if (user.getNickName().equals((nickName))){
+            if (user.getEmail() != null && user.getEmail().equals(email)){
                 return true;
             }
         }
@@ -514,10 +542,53 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         });
     }
 
-    private void rankingRecommend(){
-        //TODO
-        for(User user: recommendUserList){
+    // Calculate the distance between two points with give latitudes and longitudes
+    public float calculateDistance(Double latitudeA, Double longitudeA,
+                                   Double latitudeB, Double longitudeB){
+        float[] results = new float[1];
+        Location.distanceBetween(latitudeA, longitudeA,
+                latitudeB, longitudeB,
+                results);
+        return results[0];
+    }
 
+    // Ranking algorithm for users
+    private void setUserRankValue(User selectedUser, int index){
+        String occupation = selectedUser.getOccupation();
+        String facebook = selectedUser.getFacebook();
+        String twitter = selectedUser.getTwitter();
+        String wechat = selectedUser.getWechat();
+        String ins = selectedUser.getInstagram();
+        String linkedin = selectedUser.getLinkedin();
+        int calculatedValue = 0;
+        if (occupation != null
+                && myself.getOccupation() != null
+                && occupation.toLowerCase().equals(myself.getOccupation().toLowerCase())) {
+            // If two people have same occupation,
+            // They probably have larger change to have similar interests and time table
+            calculatedValue += 3;
         }
+        if (facebook != null && myself.getFacebook() != null){
+            // Many people using facebook, relatively higher score
+            calculatedValue += 2;
+        }
+        if (wechat != null && myself.getWechat() != null){
+            // Many people using WeChat, relatively higher score
+            calculatedValue += 2;
+        }
+        if (twitter != null && myself.getTwitter() != null){
+            // Many people using twitter, relatively higher score
+            calculatedValue += 2;
+        }
+        if (ins != null && myself.getInstagram() != null){
+            // Not so many user, relatively smaller value
+            calculatedValue += 1;
+        }
+        if (linkedin != null && myself.getLinkedin() != null){
+            // Not so many user, relatively smaller value
+            calculatedValue += 1;
+        }
+        selectedUser.setRankValue(calculatedValue);
+        valueMap.put(index, calculatedValue);
     }
 }

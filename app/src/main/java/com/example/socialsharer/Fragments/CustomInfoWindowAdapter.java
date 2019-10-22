@@ -65,9 +65,11 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             File file = new File(path);
             Log.i(TAG, "file exist : " + file.exists());
             Bitmap bitmap = BitmapFactory.decodeFile(path);
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(
-                    bitmap, 100, 90, false);
-            user_image.setImageBitmap(scaledBitmap);
+            if (bitmap != null){
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(
+                        bitmap, 100, 90, false);
+                user_image.setImageBitmap(scaledBitmap);
+            }
         }
 
         int id;

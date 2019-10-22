@@ -17,6 +17,7 @@ public class User implements Serializable {
     private String instagram;
     private String wechat;
     private String linkedin;
+    private int rankValue;
 
     public User(String email, String nickName, String introduction,
                 Double latitude, Double longitude, String occupation,
@@ -35,11 +36,16 @@ public class User implements Serializable {
         this.instagram = instagram;
         this.wechat = wechat;
         this.linkedin = linkedin;
+        rankValue = 0;
     }
 
     public void setImagePath(String path){
         this.imagePath = path;
     }
+
+    public void setRankValue(int value){ rankValue = value; }
+
+    public int getRankValue(){ return rankValue ;}
 
     public String getEmail() {
         return email;
