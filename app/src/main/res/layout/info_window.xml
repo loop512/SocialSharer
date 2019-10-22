@@ -26,12 +26,12 @@
         <TextView
             android:id="@+id/user_name"
             android:layout_width="221dp"
-            android:layout_height="40dp"
+            android:layout_height="30dp"
             android:layout_marginStart="10dp"
             android:adjustViewBounds="true"
             android:text="TextView"
             android:textAlignment="textStart"
-            android:textSize="26sp"
+            android:textSize="22sp"
             android:textColor="#000000"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -39,18 +39,31 @@
             app:layout_constraintTop_toTopOf="@+id/user_image" />
 
         <TextView
-            android:id="@+id/user_introduction"
-            android:layout_width="214dp"
-            android:layout_height="37dp"
+            android:id="@+id/user_occupation_real"
+            android:layout_width="221dp"
+            android:layout_height="30dp"
             android:layout_marginStart="10dp"
             android:adjustViewBounds="true"
             android:text="TextView"
-            android:textSize="18sp"
             android:textColor="#000000"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/user_name"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toEndOf="@+id/user_image"
             app:layout_constraintTop_toBottomOf="@+id/user_name" />
+
+        <TextView
+            android:id="@+id/user_introduction"
+            android:layout_width="221dp"
+            android:layout_height="30dp"
+            android:adjustViewBounds="true"
+            android:text="TextView"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="@+id/user_occupation_real"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/user_occupation_real"
+            app:layout_constraintTop_toBottomOf="@+id/user_occupation_real" />
 
         <ImageView
             android:id="@+id/icon_wechat"

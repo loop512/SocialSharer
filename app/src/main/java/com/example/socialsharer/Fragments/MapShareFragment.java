@@ -321,6 +321,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             final String wechat = user.getWechat();
             final String ins = user.getInstagram();
             final String twitter = user.getTwitter();
+            final String occupation = user.getOccupation();
             try{
                 final File localFile = File.createTempFile("images", "jpg");
                 imageRef.getFile(localFile).addOnSuccessListener(
@@ -332,7 +333,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 Bitmap bitmap = BitmapFactory.decodeFile(path);
                                 addMarker(bitmap, opacity, userLocation,
                                         name, introduction, path, email,
-                                        facebook, linkedin, wechat, ins, twitter);
+                                        facebook, linkedin, wechat, ins, twitter, occupation);
                             }
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -342,7 +343,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                     getResources(), R.drawable.unknown);
                             addMarker(bitmap, opacity, userLocation,
                                     name, introduction, null, email,
-                                    facebook, linkedin, wechat, ins, twitter);
+                                    facebook, linkedin, wechat, ins, twitter, occupation);
                             Log.i(TAG, "Fail to download user image, using default");
                         }
                     }
@@ -356,7 +357,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     public void addMarker(Bitmap bitmap, float opacity, LatLng userLocation, String name,
                           String introduction, String path_userImage, String email,
                           String facebook, String linkedin, String wechat, String ins,
-                          String twitter){
+                          String twitter, String occupation){
         Bitmap smallBitMap = scaleBitmap(bitmap, 170, false);
         Bitmap handledBitmap = imageHandler.transform(smallBitMap);
         BitmapDescriptor bitmapDescriptor =
@@ -366,15 +367,23 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                 .position(userLocation)
                 .title(name)
                 .icon(bitmapDescriptor);
-        String social = facebook + " " + linkedin + " " + wechat + " " + ins + " " + twitter + " ";
+        String social;
+        if (occupation != null){
+            String start = "1" + " " + occupation;
+            social = start + " ";
+        } else {
+            social = "";
+        }
+        social += setNull(facebook) + " " + setNull(linkedin) + " " + setNull(wechat) + " "
+                + setNull(ins) + " " + setNull(twitter) + " ";
         String info = "";
-        if (introduction != null) {
-            info += introduction + " ";
+        if (path_userImage != null) {
+            info += path_userImage + " ";
         } else {
             info += "null" + " ";
         }
-        if (path_userImage != null) {
-            info += path_userImage + " ";
+        if (introduction != null) {
+            info += introduction + " ";
         } else {
             info += "null" + " ";
         }
@@ -382,6 +391,14 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         marker.snippet(info);
         googleMap.addMarker(marker);
         userEmails.put(marker.getSnippet(), email);
+    }
+
+    private String setNull(String input){
+        if (input == null){
+            return "null";
+        } else {
+            return input;
+        }
     }
 
     public void recommendUser(){

@@ -42,27 +42,65 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         ImageView wechat_view = view.findViewById(R.id.icon_wechat);
         ImageView ins_view = view.findViewById(R.id.icon_ins);
         ImageView twitter_view = view.findViewById(R.id.icon_twitter);
+        TextView user_real_occupation = view.findViewById(R.id.user_occupation_real);
 
         user_name.setText(marker.getTitle());
-        String displayedMessage = message + " " + marker.getTitle();
+        String displayedMessage = message + marker.getTitle();
         user_occupation.setText(displayedMessage);
         String[] informations = marker.getSnippet().split(" ");
 
-        String facebook = informations[0];
-        String linkedin = informations[1];
-        String wechat = informations[2];
-        String ins = informations[3];
-        String twitter = informations[4];
-        String introduction = informations[5];
-        String path = informations[6];
-        Log.i(TAG, marker.getSnippet());
-
-        if (!introduction.equals(NULLSTRING)) {
-
-            user_introduction.setText(introduction);
-        } else {
-            user_introduction.setVisibility(TextView.INVISIBLE);
+        Log.i(TAG, "all information :" + marker.getSnippet());
+        Log.i(TAG, "Infolist length: " + informations.length);
+        for (String info: informations){
+            Log.i(TAG, "passed :" + info);
         }
+        int index = 0;
+        String occupation = null;
+        if (informations[0].equals("1")){
+            //This user has occupation.
+            index = 1;
+            occupation = informations[index];
+            index += 1;
+        }
+
+        String facebook = informations[index];
+        index += 1;
+        String linkedin = informations[index];
+        index += 1;
+        String wechat = informations[index];
+        index += 1;
+        String ins = informations[index];
+        index += 1;
+        String twitter = informations[index];
+        index += 1;
+        String path = informations[index];
+        index += 1;
+        String information;
+        if (informations.length == index){
+            information = informations[index];
+        } else {
+            information = "";
+            for (int i = index; i < informations.length; i++){
+                information += informations[i] + " ";
+            }
+        }
+
+        if (occupation == null){
+            if (!information.equals(NULLSTRING)) {
+                user_real_occupation.setText(information);
+            } else {
+                user_real_occupation.setVisibility(View.INVISIBLE);
+                user_introduction.setVisibility(TextView.INVISIBLE);
+            }
+        } else {
+            user_real_occupation.setText(occupation);
+            if (!information.equals(NULLSTRING)) {
+                user_introduction.setText(information);
+            } else {
+                user_introduction.setVisibility(TextView.INVISIBLE);
+            }
+        }
+
         if (!path.equals(NULLSTRING)) {
             File file = new File(path);
             Log.i(TAG, "file exist : " + file.exists());
