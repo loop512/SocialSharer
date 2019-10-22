@@ -44,7 +44,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         ImageView twitter_view = view.findViewById(R.id.icon_twitter);
 
         user_name.setText(marker.getTitle());
-        user_occupation.setText(message);
+        String displayedMessage = message + " " + marker.getTitle();
+        user_occupation.setText(displayedMessage);
         String[] informations = marker.getSnippet().split(" ");
 
         String facebook = informations[0];
@@ -57,6 +58,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         Log.i(TAG, marker.getSnippet());
 
         if (!introduction.equals(NULLSTRING)) {
+
             user_introduction.setText(introduction);
         } else {
             user_introduction.setVisibility(TextView.INVISIBLE);
