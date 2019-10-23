@@ -306,6 +306,13 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Comparing the data changes and decide what to toast.
+     * State means:
+     * 1 -> Sent request be current user
+     * 2 -> Rejected request by receiving user
+     * 3 -> Confirmed request by receiving user
+     * 4 -> Received request by current user
+     * 5 -> Rejected request by current user
+     * 6 -> Deleted request/contact
      * @param temp A temp map object that stores all the data retrieved from database after change
      */
     void compare(Map<String, Object> temp){
