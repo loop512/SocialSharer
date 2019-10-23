@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -99,6 +100,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private User myself = null;
     // Stores every user's calculated value calculated by the algorithm
     private HashMap<Integer, Integer> valueMap;
+    private SharedPreferences shared;
 
     public MapShareFragment() {
         // Required empty public constructor
@@ -112,7 +114,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         db = FirebaseFirestore.getInstance();
 
         // Load required information
-        SharedPreferences shared = getActivity().getSharedPreferences("SharedInformation", MODE_PRIVATE);
+        shared = getActivity()
+                .getSharedPreferences("SharedInformation", MODE_PRIVATE);
         userNumber = shared.getLong("userNumber", 0);
         userEmail = shared.getString("email", "");
         nickName = shared.getString("nickName", "");
@@ -125,6 +128,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_map_share, container,
                 false);
+
+        if (myself == null){
+            createMyself();
+        }
         mMapView = v.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
@@ -239,6 +246,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         // Record the location if location changed
         this.longitude = location.getLongitude();
         this.latitude = location.getLatitude();
+        SharedPreferences.Editor editor = shared.edit();
+        editor.putString("latitude", latitude.toString()).commit();
+        editor.putString("longitude", longitude.toString()).commit();
         if(firstTime){
             // If first time open map, upload the current location
             updateLocation(userEmail);
@@ -273,6 +283,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         }
         // Remove timer which used for upload locations
         recommendHandler.removeCallbacks(recommendRunnable);
+        getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
     }
 
     @Override
@@ -295,6 +306,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             Log.i(TAG, "Resume of fragment, timer is added");
         } else {}
     }
+
 
     /**
      * This function upload current user's current location to the database
@@ -544,13 +556,18 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                         choosedNumber += 1;
                                         Log.i(TAG, "sampled user number: "
                                                 + choosedNumber);
+                                        if (latitude == null){
+                                            // User switch UI too fast, directly stop function.
+                                            return;
+                                        }
                                         float distance = calculateDistance(latitude, longitude
                                                 , newRecommendUser.getLatitude()
                                                 , newRecommendUser.getLongitude());
                                         if (distance > 200000){
                                             Log.i(TAG, "recommend list size: "
                                                     + recommendUserList.size());
-                                            // Then don't add those who are far away from current user
+                                            // Then don't add those who
+                                            // are far away from current user
                                         } else {
                                             // Distance is close, can add into recommendation list
                                             Log.i(TAG, "Current selected user: "
@@ -610,7 +627,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     // Scale a bit map image
     private Bitmap scaleBitmap(Bitmap realImage, float maxImageSize,
                                    boolean filter) {
-        realImage = Bitmap.createScaledBitmap(realImage, 300, 300, false);
+        realImage = Bitmap.createScaledBitmap(
+                realImage, 300, 300, false);
         float ratio = Math.min(
                 (float) maxImageSize / realImage.getWidth(),
                 (float) maxImageSize / realImage.getHeight());
@@ -640,8 +658,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     }
 
     // Calculate the distance between two points with give latitudes and longitudes
-    public float calculateDistance(Double latitudeA, Double longitudeA,
-                                   Double latitudeB, Double longitudeB){
+    public float calculateDistance(double latitudeA, double longitudeA,
+                                   double latitudeB, double longitudeB){
         float[] results = new float[1];
         Location.distanceBetween(latitudeA, longitudeA,
                 latitudeB, longitudeB,
