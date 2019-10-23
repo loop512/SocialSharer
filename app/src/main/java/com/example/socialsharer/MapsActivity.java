@@ -4,6 +4,7 @@ package com.example.socialsharer;
  * Created by CHENG, ZHANG 944942, 04/10/2019
  * Notice that this is not used since the main functions are moved into MapShareFragment
  * However, this file allows a full screen map.
+ * Currently not used, leave for future usage if full map required
  */
 
 import androidx.annotation.NonNull;

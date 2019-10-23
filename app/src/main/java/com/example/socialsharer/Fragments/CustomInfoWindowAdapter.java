@@ -15,6 +15,10 @@ import com.google.android.gms.maps.model.Marker;
 
 import java.io.File;
 
+/**
+ * This class is a customized information window displayed on google map when click on a marker
+ * implements GoogleMap.InfoWindowAdapter
+ */
 public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     static String TAG = "infoWindowAdaper";
@@ -32,8 +36,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         View view = ((Activity) myContext).getLayoutInflater().inflate(
                 R.layout.info_window, null);
 
+        // Set up views
         TextView user_name = view.findViewById(R.id.user_name);
-
         TextView user_introduction = view.findViewById(R.id.user_introduction);
         TextView user_occupation = view.findViewById(R.id.user_occupation);
         ImageView user_image = view.findViewById(R.id.user_image);
@@ -44,16 +48,22 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         ImageView twitter_view = view.findViewById(R.id.icon_twitter);
         TextView user_real_occupation = view.findViewById(R.id.user_occupation_real);
 
+        // Get user name from the markers title
         user_name.setText(marker.getTitle());
         String displayedMessage = message + marker.getTitle();
         user_occupation.setText(displayedMessage);
+        // Receiving and processing of information that stored in marker.getSnippet
         String[] informations = marker.getSnippet().split(" ");
 
+        // Debugging use
         Log.i(TAG, "all information :" + marker.getSnippet());
         Log.i(TAG, "Infolist length: " + informations.length);
         for (String info: informations){
             Log.i(TAG, "passed :" + info);
         }
+
+        // Check whether current user has occupation
+        // and decide which information are contained in the previous retrieved getSnippet
         int index = 0;
         String occupation = null;
         if (informations[0].equals("1")){
@@ -63,6 +73,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             index += 1;
         }
 
+        // retrieve useful information
         String facebook = informations[index];
         index += 1;
         String linkedin = informations[index];
@@ -75,6 +86,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
         index += 1;
         String path = informations[index];
         index += 1;
+
+        // Check whether selected user has personal self introduction
         String information;
         if (informations.length == index){
             information = informations[index];
@@ -85,6 +98,8 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             }
         }
 
+        // Decide which text view to use
+        // depends on whether current user has occupation information or not
         if (occupation == null){
             if (!information.equals(NULLSTRING)) {
                 user_real_occupation.setText(information);
@@ -101,6 +116,7 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             }
         }
 
+        // Display user uploaded image or using default image if no image uploaded
         if (!path.equals(NULLSTRING)) {
             File file = new File(path);
             Log.i(TAG, "file exist : " + file.exists());
@@ -112,31 +128,35 @@ public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
             }
         }
 
+        // For social media icons, display grey icon
+        // if selected user doesn't have that social media information.
+        // Otherwise display colorful icon
         int id;
         if (facebook.equals(NULLSTRING)){
             id = R.drawable.facebook_grey;
-            setIcon(facebook, id, facebook_view);
+            setIcon(id, facebook_view);
         }
         if (linkedin.equals(NULLSTRING)){
             id = R.drawable.linkedin_grey;
-            setIcon(facebook, id, linkedin_view);
+            setIcon(id, linkedin_view);
         }
         if (wechat.equals(NULLSTRING)){
             id = R.drawable.wechat_grey;
-            setIcon(facebook, id, wechat_view);
+            setIcon(id, wechat_view);
         }
         if (ins.equals(NULLSTRING)){
             id = R.drawable.instagram_grey;
-            setIcon(facebook, id, ins_view);
+            setIcon(id, ins_view);
         }
         if (twitter.equals(NULLSTRING)){
             id = R.drawable.twitter_grey;
-            setIcon(facebook, id, twitter_view);
+            setIcon(id, twitter_view);
         }
         return view;
     }
 
-    private void setIcon(String check, int id, ImageView view){
+    // Set grey icon for social media view
+    private void setIcon(int id, ImageView view){
         Bitmap bitmap = BitmapFactory.decodeResource(myContext.getResources(), id);
         view.setImageBitmap(bitmap);
     }

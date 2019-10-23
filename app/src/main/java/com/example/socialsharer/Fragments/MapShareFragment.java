@@ -56,17 +56,27 @@ import java.util.Random;
 
 import static android.content.Context.MODE_PRIVATE;
 
+/**
+ * This class allow users to access map and see recommended users around him,
+ * click on those markers user would be able to see a information window
+ * which contains basic information about that user.
+ */
 public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
         OnMapReadyCallback, LocationListener{
 
     private static final String TAG = "MapShareFragment";
 
+    // Map view and map object
     private MapView mMapView;
     private GoogleMap googleMap;
+
+    // Location information and location manager
     private Double latitude;
     private Double longitude;
     private LocationManager locationManager;
+
+    // Connection to db and timely upload information, and variables used for recommend user
     private FirebaseFirestore db;
     private Handler timeHandler;
     private Handler recommendHandler;
@@ -81,11 +91,13 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     private int targetNumber = 4;
     private int choosedNumber;
     private String nickName;
-        private CircleImage imageHandler = new CircleImage();
+    private CircleImage imageHandler = new CircleImage();
     private boolean firstTime = true;
     private StorageReference storageRef;
     private HashMap<String, String> userEmails;
+    // Stores current login user's information
     private User myself = null;
+    // Stores every user's calculated value calculated by the algorithm
     private HashMap<Integer, Integer> valueMap;
 
     public MapShareFragment() {
@@ -99,6 +111,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         // Connect to fire base document database
         db = FirebaseFirestore.getInstance();
 
+        // Load required information
         SharedPreferences shared = getActivity().getSharedPreferences("SharedInformation", MODE_PRIVATE);
         userNumber = shared.getLong("userNumber", 0);
         userEmail = shared.getString("email", "");
@@ -117,12 +130,12 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
         mMapView.onResume();// needed to get the map to display immediately
         mMapView.getMapAsync(this);
-
         return v;
     }
 
     @Override
     public void onMapReady(GoogleMap map) {
+        // Each time on map ready, need to reset information stored and re-recommend users
         choosedNumber = 0;
         recommendUserList = new ArrayList<>();
         selectedIndex = new ArrayList<>();
@@ -210,6 +223,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
+        // If my location click, show a kind information tell him this is himself
         String messageToShow;
         String message = "!\nGo to find some new friends :)";
         if (nickName == null){
@@ -222,20 +236,18 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
 
     @Override
     public void onLocationChanged(Location location) {
+        // Record the location if location changed
+        this.longitude = location.getLongitude();
+        this.latitude = location.getLatitude();
         if(firstTime){
-            this.longitude = location.getLongitude();
-            this.latitude = location.getLatitude();
-
+            // If first time open map, upload the current location
             updateLocation(userEmail);
             // Move camera to current location when open the app
             LatLng latLng = new LatLng(this.latitude, this.longitude);
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 8);
             googleMap.animateCamera(cameraUpdate);
             firstTime = false;
-
         }
-        this.longitude = location.getLongitude();
-        this.latitude = location.getLatitude();
     }
 
     @Override
@@ -256,8 +268,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             Log.i(TAG, "Stop of fragment, timer is removed");
         }
         if (permission){
+            // Upload the last location
             updateLocation(userEmail);
         }
+        // Remove timer which used for upload locations
         recommendHandler.removeCallbacks(recommendRunnable);
     }
 
@@ -266,6 +280,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         // Called when app is switched or fragment is change
         super.onPause();
         if(timeRunnable != null){
+            // Remove timer for timely upload locations
             timeHandler.removeCallbacks(timeRunnable);
             Log.i(TAG, "Pause of fragment, timer is removed");
         }
@@ -275,11 +290,16 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
     public void onResume() {
         super.onResume();
         if (permission){
+            // Reset timer for timely upload locations
             timeHandler.postDelayed(timeRunnable, 300000);
             Log.i(TAG, "Resume of fragment, timer is added");
         } else {}
     }
 
+    /**
+     * This function upload current user's current location to the database
+     * @param email current user's email used as index in database
+     */
     public void updateLocation(String email){
         Map<String, Object> data = new HashMap<>();
 
@@ -292,6 +312,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             + " latitude: " + this.latitude);
     }
 
+    /**
+     * This function set a timer to upload user's location periodically
+     */
     public void timeUpdate(){
         Log.i(TAG, "Timer added");
         timeRunnable = new Runnable() {
@@ -304,11 +327,17 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         };
     }
 
+    /**
+     * This function download and stores user's image in the temp file
+     * After that the function will automatically add markers on the map
+     */
     public void downloadImages(){
         storageRef = FirebaseStorage.getInstance().getReference();
         for(User user: recommendUserList) {
+            // Set up iamge path used in the database
             String path = user.getEmail() + "/Photo";
             StorageReference imageRef = storageRef.child(path);
+            // Get useful information
             final String email = user.getEmail();
             final Double longitude = user.getLongitude();
             final Double latitude = user.getLatitude();
@@ -323,11 +352,13 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
             final String twitter = user.getTwitter();
             final String occupation = user.getOccupation();
             try{
+                // Create temp file
                 final File localFile = File.createTempFile("images", "jpg");
                 imageRef.getFile(localFile).addOnSuccessListener(
                         new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                             @Override
                             public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                // Successfully download the image, store the image's path
                                 Log.i(TAG, "User image Downloaded");
                                 String path = localFile.getAbsolutePath();
                                 Bitmap bitmap = BitmapFactory.decodeFile(path);
@@ -338,7 +369,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                         }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
+                        // Check is added, otherwise causing error if switching UI at this point
                         if(isAdded()) {
+                            // Fail to connect to database, using default image
                             Bitmap bitmap = BitmapFactory.decodeResource(
                                     getResources(), R.drawable.unknown);
                             addMarker(bitmap, opacity, userLocation,
@@ -349,24 +382,45 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     }
                 });
             } catch (Exception e){
+                // Can't even create temp file, need to check user permission
                 Log.i(TAG, "Fail to create temp file");
             }
         }
     }
 
+    /**
+     * This function automatically add a marker on the map
+     * @param bitmap User's image
+     * @param opacity The opacity of that marker
+     * @param userLocation User's location, contains latitude and longitude
+     * @param name User's displayed name
+     * @param introduction User's self introduction
+     * @param path_userImage User's image stored path
+     * @param email User's email
+     * @param facebook User's facebook link
+     * @param linkedin User's linkedin link
+     * @param wechat User's wechat ID
+     * @param ins User' in link
+     * @param twitter User's twitter link
+     * @param occupation User' occupation
+     */
     public void addMarker(Bitmap bitmap, float opacity, LatLng userLocation, String name,
                           String introduction, String path_userImage, String email,
                           String facebook, String linkedin, String wechat, String ins,
                           String twitter, String occupation){
+        // First process the user image
         Bitmap smallBitMap = scaleBitmap(bitmap, 170, false);
         Bitmap handledBitmap = imageHandler.transform(smallBitMap);
         BitmapDescriptor bitmapDescriptor =
                 BitmapDescriptorFactory.fromBitmap(handledBitmap);
+        // Set marker options
         MarkerOptions marker = new MarkerOptions()
                 .alpha(opacity)
                 .position(userLocation)
                 .title(name)
                 .icon(bitmapDescriptor);
+
+        // Put necessary information that passed to the information window.
         String social;
         if (occupation != null){
             String start = "1" + " " + occupation;
@@ -401,6 +455,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         }
     }
 
+    /**
+     * Get the sampled user's information from data base
+     */
     public void recommendUser(){
         storageRef = FirebaseStorage.getInstance().getReference();
 
@@ -414,9 +471,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     downloadImages();
                     recommendHandler.removeCallbacks(recommendRunnable);
                 } else {
-                    // Wait for another 1 sec
+                    // Sample again
                     randomSelect();
                     for (int index: selectedIndex){
+                        // Load the sampled user's information
                         getDocument(index);
                         Log.i(TAG, "User: " + index);
                     }
@@ -424,6 +482,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                             + "target number :" + targetNumber
                             + "sampled number :" + choosedNumber);
                     Log.i(TAG, "Still fetching data from server.");
+                    // Rerun this function after 1 sec.
                     recommendHandler.postDelayed(recommendRunnable, 1000);
                 }
             }
@@ -440,8 +499,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         Random generater = new Random();
         for (int currentNum = 0; currentNum < randomNumber; currentNum ++){
             if(recommendUserList.size() + selectedList.size() >= randomNumber){
+                // Already sampled enough users
                 break;
             } else {
+                // Keep sampling
                 int nextInt = generater.nextInt(maxIndex);
                 while (selectedList.contains(nextInt)) {
                     nextInt = generater.nextInt(maxIndex);
@@ -452,6 +513,10 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         selectedIndex = selectedList;
     }
 
+    /**
+     * Fetch all information about that user using index
+     * @param index user's document index
+     */
     public void getDocument(int index){
         Log.i(TAG, "fetch index: " + index);
         db.collection("users")
@@ -461,6 +526,7 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
+                            // Connected to database
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 User newRecommendUser = CommonFunctions.createUser(document,
                                         null);
@@ -472,6 +538,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                     Log.i(TAG, "recommend list size: "
                                             + recommendUserList.size());
                                 } else {
+                                    // User has location information and
+                                    // also not been in the recommendation list now
                                     if(!containUser(newRecommendUser.getEmail())){
                                         choosedNumber += 1;
                                         Log.i(TAG, "sampled user number: "
@@ -482,8 +550,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                         if (distance > 200000){
                                             Log.i(TAG, "recommend list size: "
                                                     + recommendUserList.size());
-                                            //Then don't add those who are far away from current user
+                                            // Then don't add those who are far away from current user
                                         } else {
+                                            // Distance is close, can add into recommendation list
                                             Log.i(TAG, "Current selected user: "
                                                     + newRecommendUser.getEmail()
                                                     + " distance: " + distance);
@@ -501,6 +570,8 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                         }
                                     }
                                     if(recommendUserList.size() > targetNumber){
+                                        // If recommendation list if full,
+                                        // start to evict users with low calculated value
                                         int min = 9999;
                                         int minIndex = 0;
                                         for (int key: valueMap.keySet()){
@@ -515,12 +586,18 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
                                 }
                             }
                         } else {
+                            // Can not reach fire base
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
                     }
                 });
     }
 
+    /**
+     * Check whether the user is already in the recommendation list
+     * @param email current user's email
+     * @return true for exist otherwise false
+     */
     private boolean containUser(String email){
         for(User user: recommendUserList){
             if (user.getEmail() != null && user.getEmail().equals(email)){
@@ -545,6 +622,9 @@ public class MapShareFragment extends Fragment implements GoogleMap.OnMyLocation
         return newBitmap;
     }
 
+    /**
+     * Retrieve all information about current login user and set global parameter
+     */
     private void createMyself(){
         DocumentReference docRef = db.collection("users")
                 .document(userEmail);

@@ -14,14 +14,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
 import com.example.socialsharer.data.User;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/**
+ * This class is used to display user information in request/contacts
+ */
 public class ContactProfileActivity extends AppCompatActivity {
 
     private static String TAG = "ContactProfileActivity";
@@ -40,6 +40,7 @@ public class ContactProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_contact_profile);
+        // Find buttons
         final Button backButton = findViewById(R.id.backButton_contact_activity);
         final Button addButton = findViewById(R.id.add_contact_button);
         final Button deleteButton = findViewById(R.id.delete_contact_button);
@@ -53,12 +54,12 @@ public class ContactProfileActivity extends AppCompatActivity {
             state = bundle.getString("state");
         }
 
+        // Find views
         profileEmail = findViewById(R.id.contact_profile_email);
         profileJob =  findViewById(R.id.contact_profile_profession);
         profileName = findViewById(R.id.contact_profile_name);
         profileNumber = findViewById(R.id.contact_profile_number);
         profileImage = findViewById(R.id.contact_profile_image);
-
         socialFacebook = findViewById(R.id.contact_profile_facebook_link);
         socialTwitter = findViewById(R.id.contact_profile_twitter_link);
         socialInstagram = findViewById(R.id.contact_profile_instagram_link);
@@ -66,19 +67,23 @@ public class ContactProfileActivity extends AppCompatActivity {
         socialLinkedin = findViewById(R.id.contact_profile_linkedin_link);
 
         if(state.equals("contact_fragment")){
+            // if this is contact fragment, set add button invisible
             addButton.setVisibility(View.INVISIBLE);
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // Remove access to user information
                     setUserInfo(user, 1);
                     processRequest(deleteButton, "Deleted", "delete", v);
                 }
             });
         } else if (state.equals("sent_request_fragment")) {
+            // If this is the sent request fragment, set add button invisible
             addButton.setVisibility(View.INVISIBLE);
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // Delete such request information in both user's database
                     processRequest(deleteButton, "Deleted", "remove", v);
                 }
             });
@@ -90,6 +95,7 @@ public class ContactProfileActivity extends AppCompatActivity {
             addButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    // Add two user as contacts
                     processRequest(addButton, "Accepted", "accept", v);
                 }
             });
@@ -108,6 +114,7 @@ public class ContactProfileActivity extends AppCompatActivity {
                     }
                 }
             });
+
             // Reject the current request
             deleteButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -115,6 +122,7 @@ public class ContactProfileActivity extends AppCompatActivity {
                     processRequest(deleteButton, "Rejected", "reject", v);
                 }
             });
+
             // if message rejected, disable accept button
             deleteButton.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -148,6 +156,13 @@ public class ContactProfileActivity extends AppCompatActivity {
         setUserInfo(user, 0);
     }
 
+    /**
+     * This function processing request based on the state
+     * @param btn The button that clicked on
+     * @param btnChange Changed text if success
+     * @param state Instruction on which command to process
+     * @param v View that the button belongs to
+     */
     private void processRequest(Button btn, String btnChange,
                                 String state, View v){
         // Create success and fail feedback for accept/reject request
@@ -162,6 +177,7 @@ public class ContactProfileActivity extends AppCompatActivity {
         int my;
         int request;
 
+        // Set target state with different command state
         if(state.equals("accept")){
             my = 3;
             request = 3;
@@ -190,9 +206,15 @@ public class ContactProfileActivity extends AppCompatActivity {
                 btn, btnChange);
     }
 
+    /**
+     * This function displays user's information on the screen
+     * @param user The user who's information is displayed
+     * @param state Command state that decide what information can be displayed
+     */
     private void setUserInfo(User user, int state){
         // Set user image
         if (state == 0){
+            // This is contact fragment, all information can be displayed
             if (user.getImagePath() != null){
                 Bitmap bitmap = BitmapFactory.decodeFile(user.getImagePath());
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap,
@@ -204,6 +226,7 @@ public class ContactProfileActivity extends AppCompatActivity {
             setTextView(profileName, user.getNickName(), user.getEmail());
             setTextView(profileJob, user.getIntroduction(), "");
         } else {
+            // Used for change state if delete contact or accept request
             if(this.state.equals("request_fragment")){
                 this.state = "contact_fragment";
             } else {
@@ -221,6 +244,12 @@ public class ContactProfileActivity extends AppCompatActivity {
         setTextView(socialWechat, user.getWechat(), NOTPROVIDED);
     }
 
+    /**
+     * This function limits access to user's information
+     * @param textView The text view that need to be limit
+     * @param context Context to display if no limitations on the access and no information provided
+     * @param defaultValue If limit access, the information shows
+     */
     private void setTextView(final TextView textView, String context, String defaultValue){
         if (state.equals("request_fragment")){
             if (textView != profileName && textView != profileJob && context != null) {
@@ -232,6 +261,7 @@ public class ContactProfileActivity extends AppCompatActivity {
             }
         }
         if (context != null){
+            // Information not provided, use default text
             textView.setText(context);
 
             textView.setOnClickListener(new View.OnClickListener() {

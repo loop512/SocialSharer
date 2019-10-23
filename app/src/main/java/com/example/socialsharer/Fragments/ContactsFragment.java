@@ -194,16 +194,28 @@ public class ContactsFragment extends Fragment {
         }
     }
 
+    /**
+     * This function can aad user to list,
+     * with their email the function queries database
+     * and then construct the object of User class
+     * @param email the target user's email
+     * @param path target user's image stored path
+     * @param info extra information to display (only used for sent requests)
+     */
     private void addUserToList(final String email, final String path, final String info){
+        // Create database reference
         final DocumentReference docRef = db.collection("users")
                 .document(email);
+        //Query data base
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 String displayName = email;
                 if (task.isSuccessful()){
+                    // Successfully connected to the database
                     DocumentSnapshot document = task.getResult();
                     if(document.exists()){
+                        // Current query user has information documents
                         User user = CommonFunctions.createUser(document, path);
                         contactUserList.add(user);
                         Log.i(TAG, "Adding user: " + user.getEmail());
@@ -211,24 +223,30 @@ public class ContactsFragment extends Fragment {
                         Log.i(TAG, "Current contact list size: " + contactUserList.size());
                         String username = user.getNickName();
                         if(username != null) {
+                            // If user doesn't provide a nick name, using email instead
                             displayName = username;
                         }
                     }
                 } else {
+                    // Fail on connect to data base
                     Log.i(TAG, "Connect to fire base failed, check internet connection");
                 }
                 String displayName_withInfo = displayName;
                 if (info != null){
+                    // Only used to display extra information for sent request
                     displayName_withInfo += " (" + info + ")";
                 }
                 if (path == null) {
+                    // This user's image is not provided and using default
                     contactList.add(new Contact(displayName_withInfo, R.drawable.unknown));
                 } else {
+                    // Using the downloaded image provided by that user
                     Bitmap bitmap = BitmapFactory.decodeFile(path);
                     Bitmap scaledBitmap = Bitmap.createScaledBitmap(
                             bitmap, 48, 48, false);
                     contactList.add(new Contact(displayName_withInfo, scaledBitmap));
                 }
+                // Set search visible since contacts/request are available
                 search.setVisibility(View.VISIBLE);
                 contactAdapter.notifyDataSetChanged();
             }
@@ -237,14 +255,25 @@ public class ContactsFragment extends Fragment {
 
     public void updateList(long state1, long state2, String info1, String info2){
         if (state2 != -1){
+            // This fragment is sent request fragment, need to check two state on the database
+            // state1 -> sent request by current user but not respond yet
+            // state2 -> sent request by current user and rejected by received user
             getList(state1, info1);
             getList(state2, info2);
         } else {
+            // This fragment is received request or contact,
+            // only need to retrieve received request or contact information
             getList(state1, null);
         }
     }
 
+    /**
+     * This function retrieve all the contacts/request information of current login user
+     * @param state query state, detailed state introduction is in main activity
+     * @param info extra info to display whether a request is accepted or rejected
+     */
     public void getList(final long state, final String info){
+        // Set database reference
         final DocumentReference documentRef = db.collection("request")
                 .document(userEmail);
 
@@ -252,15 +281,19 @@ public class ContactsFragment extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()){
+                    // Connected to fire base
                     int contact_number = 0;
                     DocumentSnapshot document = task.getResult();
                     if(document.exists()){
+                        // Current user's contacts/requests document exist
                         Map<String, Object> requests;
                         requests = document.getData();
                         if (requests.size() != 0) {
                             // Current user has potential requests/contacts
                             Set users = requests.keySet();
                             for(Object user: users){
+                                // Retrieve all the information
+                                // for contacts/requests in the document
                                 if((long) requests.get(user) == state){
                                     downloadImage((String) user, info);
                                     contact_number += 1;
@@ -292,6 +325,9 @@ public class ContactsFragment extends Fragment {
         });
     }
 
+    /**
+     * This function dismiss the process dialog and display the list view
+     */
     private void dismissDialog(){
         if(dialog != null) {
             dialog.dismiss();
@@ -308,6 +344,7 @@ public class ContactsFragment extends Fragment {
         if(firstOpen){
             firstOpen = false;
         } else {
+            // Clear all the previous retrieved information and re-recommend users
             contactList.clear();
             contactUserList.clear();
             contactAdapter.notifyDataSetChanged();
@@ -319,6 +356,17 @@ public class ContactsFragment extends Fragment {
     public void onStop() {
         super.onStop();
     }
+
+    /**************************************************************************************
+     * Following parts are functions used for setting up states and usefull
+     * parameters.
+     * state1, state2 -> Parameters used for querying database
+     * emptyId -> Used for controlling displaying information in empty list view
+     * listViewId -> Used for controlling which list view to display
+     * searchId -> Used for controlling which search bar(different default hint) to display
+     * fragmentState -> Determine whether this fragment should display requests or contacts
+     * info1, info2 -> Information displayed on each row when request are waiting or rejected
+     **************************************************************************************/
 
     void setState(int state){
         this.state = state;

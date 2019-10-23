@@ -39,9 +39,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
@@ -50,13 +47,15 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.MetadataChanges;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
-
 import java.util.Map;
 import java.util.Set;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
+/**
+ * The main activity after login, shows the fragment list
+ * Also listen to database change to notify current user
+ * about new requests and contacts
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -73,7 +72,6 @@ public class MainActivity extends AppCompatActivity
     private TextView profileName;
     private TextView profileEmail;
     private Map<String, Object> currentRequest;
-
     private FirebaseAuth mAuth;
     private StorageReference storageRef;
 
@@ -83,9 +81,11 @@ public class MainActivity extends AppCompatActivity
         requestPermissions();
         db = FirebaseFirestore.getInstance();
 
+        // Authenticate current user
         mAuth = FirebaseAuth.getInstance();
         storageRef = FirebaseStorage.getInstance().getReference(mAuth.getCurrentUser().getEmail());
 
+        // Load necessary information
         SharedPreferences shared = getSharedPreferences("SharedInformation", MODE_PRIVATE);
         userNumber = shared.getLong("userNumber", 0);
         userEmail = mAuth.getCurrentUser().getEmail();
@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity
         profileEmail = navigationView.getHeaderView(0).findViewById(R.id.drawer_profile_email);
         getBasicProfile();
 
+        // Set up database listener
         listener();
     }
 
@@ -160,12 +161,12 @@ public class MainActivity extends AppCompatActivity
             return false;
         }
 
+        // Put information that need to pass to each fragments
         Bundle bundle = new Bundle();
         bundle.putString("email", userEmail);
         bundle.putLong("userNumber", userNumber);
 
         String tag;
-
         if (id == R.id.nav_profile) {
             fragment = new ProfileFragment();
             tag = "profile";
@@ -206,6 +207,7 @@ public class MainActivity extends AppCompatActivity
         FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.replace(R.id.frame, fragment, tag);
         if(!tag.equals("mapshare")) {
+            // Put fragments in to stack
             fragmentTransaction.addToBackStack(tag);
         }
         fragmentTransaction.commit();
@@ -220,14 +222,13 @@ public class MainActivity extends AppCompatActivity
      * this method request to permission asked.
      */
     private void requestPermissions() {
+        // Check whether should ask for permission
         boolean shouldProvideRationale =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION);
-
         boolean shouldProvideRationale_storage =
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
 
         String[] permissions = new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -269,6 +270,11 @@ public class MainActivity extends AppCompatActivity
         profileEmail.setText(mAuth.getCurrentUser().getEmail());
     }
 
+    /**
+     * This function listen to the database for real time changes
+     * and inform the login user about new received/rejected request
+     * or new accepted/deleted contacts
+     */
     private void listener(){
         final DocumentReference requestDocRef =
                 db.collection("request").document(userEmail);
@@ -282,14 +288,14 @@ public class MainActivity extends AppCompatActivity
                             " still can manually receive request");
                 }
 
+                // Get all data from database
                 String source = snapshot != null && snapshot.getMetadata().hasPendingWrites()
                         ? "Local" : "Server";
 
+                // If data changed compare changes in the data
                 if (snapshot != null && snapshot.exists()){
                     Map<String, Object> tempRequest = snapshot.getData();
-
                     compare(tempRequest);
-
                     Log.d(TAG, source + " data: " + snapshot.getData());
                 } else {
                     Log.d(TAG, source + " data: null");
@@ -298,6 +304,10 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    /**
+     * Comparing the data changes and decide what to toast.
+     * @param temp A temp map object that stores all the data retrieved from database after change
+     */
     void compare(Map<String, Object> temp){
         if (currentRequest == null){
             // initialize, record current state!
@@ -348,6 +358,7 @@ public class MainActivity extends AppCompatActivity
                         default_toast = "You received a new friend request," +
                                 "check your received request.";
                     } else {
+                        // No need to process, ignore changes
                         toast_state = -1;
                         default_toast = null;
                     }
@@ -358,9 +369,17 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * This function toast different messages based on comparison
+     * @param activity Activity to toast
+     * @param user The user who trigger this event
+     * @param toast_state Decide to toast or not
+     * @param default_toast The default information
+     */
     private void compareToast(final Context activity, Object user,
                               final int toast_state, final String default_toast){
         if (toast_state != -1){
+            // need to toast, but first check trigger user's database to get his nickname
             String email = (String) user;
             DocumentReference docRef = db.collection("users")
                     .document(email);
@@ -369,8 +388,10 @@ public class MainActivity extends AppCompatActivity
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                             if (task.isSuccessful()){
+                                // Connected to database
                                 DocumentSnapshot document = task.getResult();
                                 if (document.exists()){
+                                    // User exist
                                     if (document.get("nickName") != null){
                                         String username = (String) document.get("nickName");
                                         String toast;

@@ -1,34 +1,36 @@
 package com.example.socialsharer;
 
-import android.app.Activity;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
-
 import com.example.socialsharer.data.User;
 import com.google.android.gms.tasks.OnCompleteListener;
-
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
-
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * This class provides common functions that can be used on all the classed
+ */
 public class CommonFunctions {
 
+    /**
+     * This function allows sending request to a target user
+     * @param activity The sending request's trigger activity
+     * @param current_email Email of the user who send request
+     * @param email Email of the user who receives request
+     * @param nickname Target user's nickname
+     * @param TAG Activity tag
+     */
     public static void sendRequest(final Context activity, final String current_email,
                             final String email, final String nickname,
                             final String TAG){
@@ -41,17 +43,20 @@ public class CommonFunctions {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 FieldPath field = FieldPath.of(email);
+                // Prepare the feedback
                 String feedbackSuccess = "Successfully sent friend request to "
                         + nickname + ".";
                 String feedbackInternet = "Fail to send request to " + nickname
                         + ", check your internet connection.";
 
+                // Prepare update objects used for database updates
                 Map<String, Object> request = new HashMap<>();
                 request.put(email, 1);
                 Map<String, Object> receive = new HashMap<>();
                 receive.put(current_email, 4);
 
                 if(task.isSuccessful()){
+                    // Successfully connect to database
                     DocumentSnapshot document = task.getResult();
                     if(document.exists()){
                         Log.i(TAG, "target user email: " + email);
@@ -120,6 +125,19 @@ public class CommonFunctions {
         });
     }
 
+    /**
+     * This function set request states in user's database documents,
+     * used for send/reject/delete requests/contacts
+     * @param activity The trigger activity
+     * @param email Target user's email
+     * @param update Update object used for database update
+     * @param feedbackSuccess Success feedback
+     * @param feedbackInternet Failure feedback
+     * @param toast Toast information
+     * @param TAG Activity tag
+     * @param btn Button trigger this event
+     * @param btnChange Changed text on button if success
+     */
     public static void setRequestState(final Context activity, final String email,
                                        final Map update, final String feedbackSuccess,
                                        final String feedbackInternet, final boolean toast,
@@ -131,7 +149,7 @@ public class CommonFunctions {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
-                    // successful update
+                    // successful update, change button if exist
                     if (toast){
                         if(btn != null){
                             btn.setClickable(false);
@@ -152,6 +170,12 @@ public class CommonFunctions {
         });
     }
 
+    /**
+     * This function retrieve a user's all information with given document snapshot
+     * @param document A documentSnapshot object of target user
+     * @param path User's image store path
+     * @return
+     */
     public static User createUser(DocumentSnapshot document, String path){
         String nickName, introduction, email, occupation, imagePath = path,
                 contactNumber, facebook, twitter,
@@ -168,6 +192,7 @@ public class CommonFunctions {
             longitude = (Double) document.get("longitude");
         }
 
+        // Load user information
         nickName = convertString(document.get("nickName"));
         introduction = convertString(document.get("Introduction"));
         occupation = convertString(document.get("Occupation"));
@@ -179,6 +204,7 @@ public class CommonFunctions {
         wechat = convertString(document.get("Wechat"));
         linkedin = convertString(document.get("Linkedin"));
 
+        // Create User object to store all the information
         User user = new User(email, nickName, introduction, latitude, longitude, occupation,
                         imagePath, contactNumber, facebook, twitter, instagram, wechat, linkedin);
         return user;
@@ -192,6 +218,11 @@ public class CommonFunctions {
         }
     }
 
+    /**
+     * Copy the clicked social media information to clipboard
+     * @param context The trigger activity or fragment
+     * @param text Text to copy
+     */
     public static void setClipboard(Context context, String text) {
         android.content.ClipboardManager clipboard
                 = (android.content.ClipboardManager)
@@ -203,6 +234,15 @@ public class CommonFunctions {
                 "copied  to clipboard", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * This function raise an alert before sending request
+     * which ask for double confirm on sending a request to target user
+     * @param context Trigger activity or fragment
+     * @param currentUserEmail Email of user who send request
+     * @param targetEmail Email of user who receive request
+     * @param targetName Nickname of user who receive request
+     * @param TAG Activity or fragment Tag
+     */
     public static void sendRequestAlert(final Context context, final String currentUserEmail,
                                         final String targetEmail, final String targetName,
                                         final String TAG){

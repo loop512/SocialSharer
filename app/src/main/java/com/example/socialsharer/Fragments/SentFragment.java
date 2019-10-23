@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 import com.example.socialsharer.R;
 
 /**
- *
+ * This class extends ContactsFragment, all setting are set up in that fragments
+ * Only need to change parameters.
+ * This class displays sent requests
  */
 public class SentFragment extends ContactsFragment {
     private static final String TAG = "SentRequestFragment";
@@ -20,6 +22,7 @@ public class SentFragment extends ContactsFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Set parameters used in received request fragment
         setState(1);
         setState2(2);
         setInfo1("Waiting");

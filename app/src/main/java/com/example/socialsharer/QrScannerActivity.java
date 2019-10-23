@@ -25,6 +25,9 @@ import com.karumi.dexter.listener.single.PermissionListener;
 
 import me.dm7.barcodescanner.zxing.ZXingScannerView;
 
+/**
+ * This class allows to scan a QR code to sent friend request to a target user.
+ */
 public class QrScannerActivity extends AppCompatActivity implements ZXingScannerView.ResultHandler {
 
     private static String TAG = "OrScannerActivity";
@@ -58,12 +61,14 @@ public class QrScannerActivity extends AppCompatActivity implements ZXingScanner
                 .withListener(new PermissionListener() {
                     @Override
                     public void onPermissionGranted(PermissionGrantedResponse response) {
+                        // Has camera permission
                         scannerView.setResultHandler(QrScannerActivity.this);
                         scannerView.startCamera();
                     }
 
                     @Override
                     public void onPermissionDenied(PermissionDeniedResponse response) {
+                        // No camera permission
                         Toast.makeText(QrScannerActivity.this,
                                 "You must accept this permission to use the qr scanner",
                                 Toast.LENGTH_SHORT).show();
@@ -75,7 +80,6 @@ public class QrScannerActivity extends AppCompatActivity implements ZXingScanner
                     }
                 })
                 .check();
-
     }
 
     @Override
@@ -93,6 +97,7 @@ public class QrScannerActivity extends AppCompatActivity implements ZXingScanner
         String targetEmail = results[0];
         String targetName = results[1];
 
+        // Sent request
         CommonFunctions.sendRequestAlert(this, userEmail, targetEmail, targetName, TAG);
 
         // Restart the camera! required otherwise the camera is stopped by ZXing and the UI stuck
