@@ -16,5 +16,8 @@ YouTube Link: https://youtu.be/6lQ9hkOIArA
 
 README:
 
-Please include details on how to compile and run your APP.
-
+Setup:
+1. Open this project through android studio.
+2. Set up specific SHA-1 key on google cloud console,
+    Please contact group member Cheng Zhang to set up the key
+3. Run the app through android studio emulator (API 29)

@@ -1,0 +1,474 @@
+commit d73dcced86f8beb2a0fd426700a970963d53531e
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 25 14:30:08 2019 +1100
+
+    Added youtube link
+
+commit 1ecf1a4e672668ea84f030189133a6cbfb230ca9
+Author: zLy28 <42787958+zLy28@users.noreply.github.com>
+Date:   Fri Oct 25 13:49:06 2019 +1100
+
+    Add files via upload
+
+commit 44b6ee32882745efd5822f6d92233f995f547edf
+Author: Irfan Bunjaku <ibunjaku@student.ethz.ch>
+Date:   Fri Oct 25 10:05:35 2019 +1100
+
+    added contribution file, plan and submission template
+
+commit 8bd5173c676a4eca222874cc638bf1f9dbef60fd
+Merge: da61ceb 966d0bd
+Author: loop512 <1695420@qq.com>
+Date:   Thu Oct 24 03:30:02 2019 +1100
+
+    merge and more test debug on mapfragment, now supply fast switch without crash
+
+commit da61cebe9861bc7a805e8f145462c9a2837ae115
+Author: loop512 <1695420@qq.com>
+Date:   Thu Oct 24 03:27:46 2019 +1100
+
+    More test and debug on mapshare fragment, support extremly fast swith without crash now
+
+commit 966d0bd3cded8b42004f4e5080183907f5282db9
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Wed Oct 23 23:41:07 2019 +1100
+
+    Changed Settings to Sign Out
+
+commit 5492998543170968c636c911ed41ba444fb289bf
+Author: loop512 <1695420@qq.com>
+Date:   Wed Oct 23 12:38:57 2019 +1100
+
+    Detailed state documentation for requests added
+
+commit 16b3d42eab93bc1921d6342ad5f8f761b9d09c13
+Author: loop512 <1695420@qq.com>
+Date:   Wed Oct 23 12:29:27 2019 +1100
+
+    clean up default code in the UI templet, add more detailed documentation for most of classes
+
+commit 4b7c123190b02b01cb7b5845fc6c98486a7ee5fe
+Author: loop512 <1695420@qq.com>
+Date:   Wed Oct 23 07:56:58 2019 +1100
+
+    clean up code and added documents in Contact, ContactAdapter, User, CircleImage and Contacts Fragment(partial)
+
+commit 3095eb919ddea55249c4bda0c221aabeb6d2512a
+Author: loop512 <1695420@qq.com>
+Date:   Tue Oct 22 22:21:56 2019 +1100
+
+    clean up code and add necessary documentation in User class
+
+commit c7471ce455771ec5769f005bad456b1849590dc6
+Author: loop512 <1695420@qq.com>
+Date:   Tue Oct 22 21:57:30 2019 +1100
+
+    change infowindow to display more informations on map
+
+commit f4d560c0298ae68cdcd9612a2df20fc3ffa7501b
+Author: loop512 <1695420@qq.com>
+Date:   Tue Oct 22 21:13:08 2019 +1100
+
+    infowindow UI improved
+
+commit 7565cdeb90ec2f76ac21871e10189d5f39175be7
+Author: loop512 <1695420@qq.com>
+Date:   Tue Oct 22 20:09:58 2019 +1100
+
+    complete entire recommandation function including sampling algorithm and value algorithm, small add on the QR scanner
+
+commit 5cfbdf7609219392bb73f5ae60a3ae7ba76eb847
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Tue Oct 22 11:08:19 2019 +1100
+
+    fix Qr extracting problem on API 29
+
+commit efd74e0f7771550eebc70b2bec2617fcea1c8a0e
+Author: loop512 <1695420@qq.com>
+Date:   Tue Oct 22 10:57:08 2019 +1100
+
+    part of ranking algorithm added
+
+commit 12f1d1322b59be252cf8184831386f97504ec6c5
+Author: loop512 <1695420@qq.com>
+Date:   Tue Oct 22 10:35:32 2019 +1100
+
+    change icon on infowindow on google map function added, now the icon will be grey if that user doesn't have that social media account
+
+commit 640d533b67d671f43ca3edaa90da7f54d1cd52fc
+Author: loop512 <1695420@qq.com>
+Date:   Tue Oct 22 09:21:53 2019 +1100
+
+    track request function/UI added, listen to server and toast function added, QR scan to add user as a friend function added, change a new view for infowindow on google map. More complete functions in Common function class.
+
+commit e480b04301ff0df1254a871ce88865f03165a8cb
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Tue Oct 22 01:08:35 2019 +1100
+
+    add userName in QR
+
+commit 4cda3710142198b38ffeb5cfac870cdf9656c4d5
+Author: xiukei <741323066@qq.com>
+Date:   Mon Oct 21 22:52:18 2019 +1100
+
+    Update user number sharing by using SharedPreference,
+    Fix bugs in Edit Profile and New User index in RegisterActivity
+
+commit bcb70f0369766911e933c1d020577c7fe933c576
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Mon Oct 21 21:32:54 2019 +1100
+
+    Save Qr code to local device done.
+
+commit 01dcffcf7846636ba398d9f05cd17b22d93a39ae
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Mon Oct 21 17:13:20 2019 +1100
+
+    QR Scanner done.
+
+commit c0fdb5d3029b46902ae80161f86cf7e772a8353e
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Mon Oct 21 17:09:45 2019 +1100
+
+    QR Scanner done.
+
+commit 1ac013e8ee45d234f0314ce146039114cd82c06f
+Author: loop512 <1695420@qq.com>
+Date:   Mon Oct 21 06:16:07 2019 +1100
+
+    send/accept/reject/delete friend request database, function and UI adjustment complete, ToDo: Notification while request are rejected or accepted or received
+
+commit a8ccb0b3276fc56a750981b72247de47ac0226c7
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Sun Oct 20 21:07:57 2019 +1100
+
+    Added buttons to qr share fragment
+
+commit 906e9a74b955a49ae5077e4f24e374baace59491
+Merge: 2efadff 183501b
+Author: xiukei <741323066@qq.com>
+Date:   Sun Oct 20 19:22:39 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+    
+    # Conflicts:
+    #       app/src/main/java/com/example/socialsharer/EditSocialsActivity.java
+    #       app/src/main/java/com/example/socialsharer/Fragments/ProfileFragment.java
+    Update Edit Socials and Load Socials
+
+commit 2efadff27e4243711373230212b2139e0f7b25f2
+Merge: b6b08fa 9b53c71
+Author: xiukei <741323066@qq.com>
+Date:   Sun Oct 20 19:06:42 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+    
+    # Conflicts:
+    #       app/src/main/res/layout/nav_header_main.xml
+    error existed (please modify the build.gradle(app) and qrshare xml file)
+
+commit 183501b6fcadd16bdd4af5f511d9a096d698f01d
+Merge: 1a503b0 9b53c71
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Sun Oct 20 19:03:56 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+
+commit 1a503b08c591705744b0b21c06c2810ca677ab02
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Sun Oct 20 19:03:05 2019 +1100
+
+    upload socials done.
+
+commit b6b08fa4496d8d628016502bfcaf820e06add726
+Author: xiukei <741323066@qq.com>
+Date:   Sun Oct 20 18:29:30 2019 +1100
+
+    Added Forgot Password Function
+    Added Edit Socials Function
+    Modify Navigation View Profile Information
+
+commit 9b53c711dbe92f2163c7aff7d6b6dbebf495508a
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Sun Oct 20 17:11:35 2019 +1100
+
+    Added contact profile ui and change password/delete account in settings
+
+commit dcfe5e3e8db92ae295d2a12f1ac705e7ec56eb4e
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Sun Oct 20 17:02:10 2019 +1100
+
+    generate one qrcode for one users
+
+commit 3e039bd9c32252efd1f1bc249f977c23729e3f34
+Author: loop512 <1695420@qq.com>
+Date:   Sun Oct 20 08:10:15 2019 +1100
+
+    please read this git add . receive request function added, I will add accept request and display business card information function tomorrow. Still need an upload function for social medias
+
+commit a1607bab6b5a8e5a1c56115053bfffb57d0362bf
+Author: loop512 <1695420@qq.com>
+Date:   Sun Oct 20 06:49:44 2019 +1100
+
+    add back to previous function an contects activity, notice that in firebase | 1: send request to that user | 2: rejected request by that user | 3 confirmed request by that user | 4 received friend request from that user |
+
+commit 3f3184aa7d630116cf652f324a541970bcc4d562
+Author: loop512 <1695420@qq.com>
+Date:   Sun Oct 20 06:22:55 2019 +1100
+
+    clean up functions in map, add create user function using documents, add tags to each fragments
+
+commit 9f72b5fc39607cc68ae5184dc8a0c6095a5ad19c
+Author: loop512 <1695420@qq.com>
+Date:   Sun Oct 20 04:43:07 2019 +1100
+
+    contacts fragement dynamic list code added, contact activity required
+
+commit f6e522fad4ba0b1cb16550148af27193abe1f865
+Author: loop512 <1695420@qq.com>
+Date:   Sat Oct 19 21:53:17 2019 +1100
+
+    add common functions
+
+commit 7db93f9a63b1906362e0be12924ce692379e2ba9
+Author: loop512 <1695420@qq.com>
+Date:   Sat Oct 19 21:15:04 2019 +1100
+
+    fix bug in random select recommend user function
+
+commit 2a4f1ea29ea94ac01a34056d3e1b561f022387fb
+Author: loop512 <1695420@qq.com>
+Date:   Sat Oct 19 20:41:34 2019 +1100
+
+    Send request to database function on map added, database set up
+
+commit 5c54dee4ac1b313a6b0bbbbc6d2692b60e7493b8
+Author: loop512 <1695420@qq.com>
+Date:   Sat Oct 19 04:45:35 2019 +1100
+
+    Triger friend request event added, still need a xml file for dialog
+
+commit 69c2cc235f15383d1e94b417a17f3a7f82b9150d
+Author: loop512 <1695420@qq.com>
+Date:   Sat Oct 19 03:11:30 2019 +1100
+
+    Completely finish infowindow function
+
+commit 7937f069aa249bfd1a03493d074dfc5eb12216b6
+Merge: 316954e 148525e
+Author: loop512 <1695420@qq.com>
+Date:   Sat Oct 19 02:19:05 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+
+commit 316954eb97fcc824bbf4e01fb27abdb19237b261
+Author: loop512 <1695420@qq.com>
+Date:   Sat Oct 19 02:18:57 2019 +1100
+
+    info window added
+
+commit 148525e6fe63b9c946ab2c875e4655cb713040fe
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 18 23:34:43 2019 +1100
+
+    Update ContactAdapter.java
+
+commit 83bb999da5c25e9faaa342619ce2d85d74e30670
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 18 23:34:38 2019 +1100
+
+    Updated Contact UI
+
+commit 4f321c360e0fab27e03ea133e5d0f97be455accf
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 18 23:12:38 2019 +1100
+
+    Added Contact UI
+
+commit 599294c5f47f51d878a34e44e35aa94baa7f98ee
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 18 21:53:30 2019 +1100
+
+    pass total user number accross activities and fragments
+
+commit 7519b669f5601544092fc75130bd2ded1046e154
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 18 21:14:29 2019 +1100
+
+    Display images function added
+
+commit 6234332ab9e35440a8b80b1688a6c8a93a0c566d
+Merge: 3daff63 1a37c13
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 18 19:05:38 2019 +1100
+
+    download functions add
+
+commit 3daff6389ce231f8ed868f51af450ca5c72aee8f
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 18 19:04:16 2019 +1100
+
+    download image function used in map added
+
+commit 1a37c138d831ab08973392b2dcc51cef41dfdea2
+Merge: bf08568 5f11c28
+Author: xiukei <741323066@qq.com>
+Date:   Fri Oct 18 16:53:58 2019 +1100
+
+    Merge remote-tracking branch 'origin/master'
+    
+    # Conflicts:
+    #       app/src/main/java/com/example/socialsharer/EditProfileActivity.java
+
+commit bf085683300a2abb2e99e9f02c4784aadd08480e
+Merge: 9b99731 b95ad4b
+Author: xiukei <741323066@qq.com>
+Date:   Fri Oct 18 16:52:03 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+    
+    # Conflicts:
+    #       app/src/main/java/com/example/socialsharer/ui/login/LoginActivity.java
+    #       app/src/main/res/values/strings.xml
+
+commit 9b99731aa4f9ccc4ec7a08e819708def4b246d4f
+Author: xiukei <741323066@qq.com>
+Date:   Fri Oct 18 16:33:54 2019 +1100
+
+    Add loading profile image and nick name for mapshare fragment
+
+commit 5f11c2821aab77438860fe499df77c90a378f9a4
+Merge: 1effecc b95ad4b
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 18 16:32:25 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+
+commit 1effecc8bc0fa95ed0590adfa47c5bb14db2e333
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 18 16:32:03 2019 +1100
+
+    More functions on register function
+
+commit b95ad4bef8e81a10f93d03a8337232de233f81d8
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 18 16:24:54 2019 +1100
+
+    Fixed
+
+commit abba245927c3358fa64970a7fb3de5acc12923e1
+Merge: 90880f9 13f4f72
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 18 16:16:32 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+
+commit 90880f94fd1288f77935e36b10881c1fe0eb6fbd
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 18 16:16:19 2019 +1100
+
+    Updated forgot password and edit socials
+
+commit 13f4f7249cce378824a8c612e3efc9ae985b6a94
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 18 16:01:11 2019 +1100
+
+    fix bugs
+
+commit 3d639383cf3d967c438c8f278c56d20b3760a544
+Merge: 8f2eaf7 58c7c8b
+Author: xiukei <741323066@qq.com>
+Date:   Thu Oct 17 18:14:10 2019 +1100
+
+    Merge branch 'master' of https://github.com/loop512/SocialSharer
+
+commit 8f2eaf7f044451ccae82e033c5689b7ba9cd8032
+Author: xiukei <741323066@qq.com>
+Date:   Thu Oct 17 18:13:57 2019 +1100
+
+    update login and logout
+
+commit 58c7c8bd9a1660c6c7d788403daba74de76138bd
+Merge: eabd6a4 5c1e673
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Thu Oct 17 17:54:00 2019 +1100
+
+    Merge remote-tracking branch 'origin/master'
+
+commit eabd6a40c79294ad724c9726eb0de3ea5a2101ca
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Thu Oct 17 17:39:46 2019 +1100
+
+    upload image successsfully
+
+commit 5c1e6734a41d6a09df374c057674bf3f5361c1e4
+Author: Irfan Bunjaku <ibunjaku@student.ethz.ch>
+Date:   Tue Oct 15 09:44:36 2019 +1100
+
+    icon added
+
+commit 7a16113f574735ef7e02100e6eea1b0d8a110f2e
+Author: zLy28 <zzzzlygood@gmail.com>
+Date:   Sat Oct 12 00:23:26 2019 +1100
+
+    fragment_profile function
+
+commit ae0e4e31bd031aa0c9ba818ed3aab5b211c274ce
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Mon Oct 7 20:02:16 2019 +1100
+
+    Updated profile fragment
+
+commit d0d597c8e7a883a4b7cafc18161fa43082b7e016
+Author: loop512 <1695420@qq.com>
+Date:   Mon Oct 7 18:58:39 2019 +1100
+
+    Small changes to map functions
+
+commit 3e4a4c51292745e536d9feb568b46f00f46ace0a
+Author: loop512 <1695420@qq.com>
+Date:   Mon Oct 7 05:52:28 2019 +1100
+
+    merge version, latest merged version, develop through this version
+
+commit 7be446968fb4f85a0f1bf0de5759cdf921daee07
+Author: loop512 <1695420@qq.com>
+Date:   Mon Oct 7 05:37:35 2019 +1100
+
+    connection between mainActivity and login added, connection between mainActivity and register activity required
+
+commit 600956b7f2fa0ca86b5419b135189de6a504248a
+Author: xiukei <741323066@qq.com>
+Date:   Sun Oct 6 22:32:49 2019 +1100
+
+    Add Login and Register Function using Firebase Authentication
+
+commit 8cc828b7da89c59346eaf8f6af731db789ae0a8c
+Author: loop512 <1695420@qq.com>
+Date:   Sun Oct 6 11:02:08 2019 +1100
+
+    Add photo of users, need photo database
+
+commit da9b0f1e85b287b57c87ba0051698ea352e00e9c
+Author: loop512 <1695420@qq.com>
+Date:   Sun Oct 6 08:11:13 2019 +1100
+
+    Fix recommend my self, add greeting on map to the current user.
+
+commit ee20367ee4c507fcbe7af69d9d90fdcdce13d3cf
+Author: loop512 <1695420@qq.com>
+Date:   Sun Oct 6 06:49:59 2019 +1100
+
+    Fetch recommend user's data function added, display recommend users on google map function added.
+
+commit 5253628189eac0f46cbd0c6a1f9560c5ff99f07f
+Author: davtc <47212365+davtc@users.noreply.github.com>
+Date:   Fri Oct 4 23:03:53 2019 +1000
+
+    Changed to TextInputLayout and updated Register/Edit Profile Activities
+
+commit b2ca88d5f04ad1d277e3deba939045c810b98974
+Author: loop512 <1695420@qq.com>
+Date:   Fri Oct 4 19:49:27 2019 +1000
+
+    v2
