@@ -6,11 +6,11 @@ Group No: #34
 
 Group Members:
 
-1: [Zhaoqi Fang, zhaoqif@student.unimelb.edu.au] 
-2: [David Tran, davidt@student.unimelb.edu.au] 
-3: [Cheng Zhang, zhangc12@student.unimelb.edu.au] 
-4: [Luyi Zhao, luyi@student.unimelb.edu.au] 
-5: [Irfan Bunjaku, ibunjaku@student.unimelb.edu.au
+1: [Zhaoqi Fang, zhaoqif@student.unimelb.edu.au, xiukei]
+2: [David Tran, davidt@student.unimelb.edu.au, davtc]
+3: [Cheng Zhang, zhangc12@student.unimelb.edu.au, loop512]
+4: [Luyi Zhao, luyi@student.unimelb.edu.au, zLy28]
+5: [Irfan Bunjaku, ibunjaku@student.unimelb.edu.au, Irfan Bunjaku]
 
 YouTube Link: https://youtu.be/6lQ9hkOIArA
 
